@@ -7,6 +7,24 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-05 — ✅ CI LIVE — first GitHub Actions run green!
+
+**Done:**
+- Marcel provided a token with `workflow` scope (verified via X-OAuth-Scopes: `read:org, repo, workflow`); stored in GCM.
+- `.github/workflows/build.yml` pushed (commit `84f9898`); gitignore block removed.
+- First run **failed** with `./test.sh: Permission denied` — the executable bit was never set in git (Windows-created files). Fixed with `git update-index --chmod=+x build.sh test.sh env.sh` (commit `ddd9b17`).
+- **Run ddd9b170: completed success** — ubuntu-latest: nasm/clang/lld/llvm/qemu-system-x86, `./test.sh` 14/14 green on a Linux runner.
+- ADR-011 fully executed: every push now builds + boot-tests AIkOS automatically.
+
+**Next:**
+- Phase 2 (Two Worlds) design doc — paging, user mode, syscalls.
+
+**Build state:** v0.3.0 + CI green.
+
+**Open questions:** none blocking.
+
+---
+
 ## 2026-08-05 — 🎉 PHASE 1.5 COMPLETE — v0.3.0: The Senses!
 
 **Done:**

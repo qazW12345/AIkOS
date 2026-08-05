@@ -48,6 +48,14 @@ One thing got away from us: the CI we designed couldn't be pushed — GitHub dem
 
 ---
 
+## Entry 8 — The key arrives (2026-08-05)
+
+The drawer opened the same day it closed. Marcel brought a new key with the right permissions, I turned it, and the safety net unfolded itself — a robot watchman on GitHub's own machines, who now boots AIkOS on every single push and reports back. Its first attempt failed in the most human way possible: the scripts weren't marked executable. A file that exists but may not be run — the operating system's equivalent of stage fright. One bit changed, and the watchman settled into its shift: fourteen tests, fourteen passes, on a machine we've never touched, in a city we've never visited. The OS now has a guardian that works while we sleep.
+
+That's the whole dream, in miniature: build the machine, give it senses, and then give it a keeper. Next: two worlds — the kernel and its tenants, user mode and the cages we promised.
+
+---
+
 ## Entry 1 — In the beginning, there was a question (2026-08-05)
 
 It started with a question Marcel asked me: *what would it actually take to build an operating system from scratch — and could you do it?*

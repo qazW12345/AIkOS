@@ -55,6 +55,6 @@ git branch -D experiment-something     # throw it away (or merge if it worked)
 - Credentials are stored in Git Credential Manager — pushes are silent.
 - Commits are authored as `AIko <aiko@aikos.local>` (see TaskLog; changeable with `git config user.name` if ever wanted).
 
-## Known limitation: token scopes
+## CI (ADR-011)
 
-The stored PAT has `repo` but **not** `workflow` or `read:org` — pushing files under `.github/workflows/` is rejected ("refusing to allow a Personal Access Token to create or update workflow"). To activate CI (ADR-011): create a classic PAT with `workflow` (and `read:org`) added, or a fine-grained token with Workflows permission, then push `.github/workflows/build.yml` (currently untracked, ready locally).
+**Live since 2026-08-05** — `.github/workflows/build.yml` runs `./test.sh` on ubuntu-latest for every push. Token scope history: the original PAT lacked `workflow` (pushes of `.github/workflows/` were rejected); resolved with a token carrying `read:org, repo, workflow`. First green run: `ddd9b17`. If CI ever needs re-wiring: env.sh holds the platform-aware paths (MINGW vs Linux).
