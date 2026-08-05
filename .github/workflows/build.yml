@@ -2,11 +2,10 @@ name: build-and-test
 
 on: [push]
 
-# Least privilege, declared explicitly (checkov CKV2_GHA_1): the test job only
-# reads; the lint job posts check statuses via super-linter's status reporter.
+# Least privilege: read-only at workflow level (checkov CKV2_GHA_1); the lint
+# job scopes statuses: write itself (zizmor excessive-permissions).
 permissions:
   contents: read
-  statuses: write
 
 jobs:
   test:
@@ -41,6 +40,9 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      statuses: write          # job-scoped: only super-linter's status reporter needs it
     steps:
       - uses: actions/checkout@v4
         with:
@@ -65,3 +67,5 @@ jobs:
           VALIDATE_PRETTIER: false
           VALIDATE_JSON: false
           VALIDATE_BIOME_FORMAT: false
+          VALIDATE_MARKDOWN_PRETTIER: false
+          VALIDATE_NATURAL_LANGUAGE: false

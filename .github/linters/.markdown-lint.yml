@@ -2,7 +2,11 @@
 # AIkOS house style for markdownlint (ADR-014 spirit: docs are code).
 # All disabled rules are deliberate house conventions, not oversights:
 MD013: false   # long prose lines / TaskLog bullets are the house style
+MD022: false   # dense markdown: headings may follow content without blank lines
 MD026: false   # celebratory milestone headings ("v0.2.0: The Machine Wakes!")
+MD029: false   # ordered lists may restart or use varied prefixes
+MD031: false   # fences may sit tight against surrounding content
+MD032: false   # lists may follow labels/headings without blank lines
 MD034: false   # bare GitHub URLs in ADRs and guides
 MD036: false   # bold label paragraphs (**Rule:**, **Done:**, ...)
 MD040: false   # ADR structure examples use bare fences
