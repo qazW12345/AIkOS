@@ -21,7 +21,7 @@ jobs:
       # Skip the QEMU suite when no code changed (docs-only pushes) — the
       # suite grows with every phase; don't burn it on prose (ADR-011 intent).
       - name: Paths Changes Filter
-        uses: ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d  # dorny/paths-filter@v4.0.3
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d  # v4.0.3
         id: changes
         with:
           filters: |
@@ -60,7 +60,7 @@ jobs:
       # python tooling lands. markdownlint uses the house config at
       # .github/linters/.markdown-lint.yml (default discovery).
       - name: Super-Linter
-        uses: 4ce20838b8ab83717e78138c5b3a1407148e0918  # super-linter/super-linter@v8.7.0
+        uses: super-linter/super-linter@4ce20838b8ab83717e78138c5b3a1407148e0918  # v8.7.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BRANCH: main
