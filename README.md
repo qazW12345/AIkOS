@@ -2,7 +2,7 @@
 
 A from-scratch hobby operating system for x86-64. No Linux, no Windows, no borrowed OS code — everything from the bootloader up is written by us, from zero.
 
-**Status:** documentation phase — the full project methodology is in place. Phase 0 (first boot) not started.
+**Status:** **Phase 0 complete — v0.1.0 boots** (2026-08-05): our own boot sector, 64-bit long mode, banner on VGA + serial. Phase 1 (interrupts, timer, keyboard) next.
 
 ## Why
 

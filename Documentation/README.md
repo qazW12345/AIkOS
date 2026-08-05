@@ -1,6 +1,6 @@
 # AIkOS Documentation — Summary & Router
 
-> **Status:** Documentation methodology established (ADR-001). No code yet. Phase 0 not started.
+> **Status:** Phase 0 SHIPPED (v0.1.0, 2026-08-05) — boots in QEMU, banner on VGA + serial. Phase 1 (interrupts, timer, keyboard) not started.
 > **Last updated:** 2026-08-05
 
 ## What is AIkOS?
@@ -9,7 +9,7 @@ A from-scratch hobby operating system for x86-64, built as a multi-year project 
 
 ## Where we are
 
-- **Phase 0 (Proof of Life): not started** — toolchain not installed yet.
+- **Phase 0 (Proof of Life): DONE — v0.1.0** (2026-08-05). Boots in QEMU via our own boot sector, reaches 64-bit long mode, prints the banner to VGA + serial, halts. `test.sh` green; release tagged.
 - Full phase list with exit criteria: `Roadmap.md`.
 
 ## Topic map — read this to find things

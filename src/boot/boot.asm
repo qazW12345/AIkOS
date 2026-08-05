@@ -1,0 +1,167 @@
+; AIkOS boot sector — real mode, loads kernel.bin to 0x100000, enters protected mode.
+; ADR-006. Assembled with NASM -f bin, loaded by BIOS at 0x7C00.
+; Kernel sector count is injected by build.sh (-D KERNEL_SECTORS).
+;
+; NOTE (hard-won, 2026-08-05): QEMU 11's SeaBIOS hangs on int 13h AH=42h when the
+; buffer is above 1 MB (its high-memory paging path spins in a serial debug loop,
+; IDE never touched). Fix: read to a low buffer (0x10000, below 1 MB), then copy
+; up to 0x100000 ourselves in real mode. See Guides/How-to-debug.md.
+;
+; Serial milestones (COM1, debug): S=start B=disk-loaded M=moved-to-1MB A=A20
+;                                    L=GDT C=CR0.PE P=PM J=kernel-jump
+
+[org 0x7C00]
+[BITS 16]
+
+%ifndef KERNEL_SECTORS
+%define KERNEL_SECTORS 64
+%endif
+
+KERNEL_LOAD_SEG  equ 0x1000      ; low read buffer: 0x1000:0x0000 = 0x10000
+KERNEL_LOAD_OFF  equ 0x0000
+KERNEL_DEST_SEG  equ 0xFFFF      ; final destination: 0xFFFF:0x0010 = 0x100000
+KERNEL_DEST_OFF  equ 0x0010
+
+start:
+    cli
+    xor ax, ax
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    mov sp, 0x7C00               ; stack grows down, below the boot sector
+    cld
+    mov [boot_drive], dl         ; save boot drive (0x80 = hard disk)
+
+    mov al, 'S'
+    call serial_putc
+
+    ; --- load kernel via int 13h AH=42h (LBA extensions) to LOW buffer ---
+    mov si, dap
+    mov ah, 0x42
+    mov dl, [boot_drive]
+    int 0x13
+    jc disk_error
+
+    mov al, 'B'
+    call serial_putc
+
+    ; --- copy kernel from low buffer (0x10000) to 0x100000 (real mode) ---
+    mov ax, KERNEL_LOAD_SEG
+    mov ds, ax
+    mov si, KERNEL_LOAD_OFF
+    mov ax, KERNEL_DEST_SEG
+    mov es, ax
+    mov di, KERNEL_DEST_OFF
+    mov cx, KERNEL_SECTORS * 256 ; sectors * 512 / 2 = sectors * 256 words
+    rep movsw
+
+    xor ax, ax                   ; restore ds for the data below
+    mov ds, ax
+
+    mov al, 'M'
+    call serial_putc
+
+    ; --- enable A20 (fast A20, port 0x92) ---
+    in al, 0x92
+    or al, 0x02
+    out 0x92, al
+    mov al, 'A'
+    call serial_putc
+
+    ; --- load GDT, enter protected mode ---
+    lgdt [gdt_desc]
+    mov al, 'L'
+    call serial_putc
+    mov eax, cr0
+    or eax, 1
+    mov cr0, eax
+    mov al, 'C'
+    call serial_putc
+    jmp 0x08:pm_entry
+
+disk_error:
+    mov si, msg_err
+.print:
+    lodsb
+    or al, al
+    jz .hang
+    mov ah, 0x0E
+    mov bx, 0x0007
+    int 0x10
+    jmp .print
+.hang:
+    hlt
+    jmp .hang
+
+; --- debug: emit char in AL to COM1 (works in real mode) ---
+serial_putc:
+    push ax
+    push dx
+    mov dx, 0x3FD               ; LSR
+.1:
+    in al, dx
+    test al, 0x20               ; THR empty?
+    jz .1
+    mov al, [esp + 2]           ; saved AX (16-bit pushes: [esp]=DX, [esp+2]=AX)
+    mov dx, 0x3F8
+    out dx, al
+    pop dx
+    pop ax
+    ret
+
+[BITS 32]
+; --- debug: emit char in AL to COM1 (32-bit protected mode).
+; NOTE: must NOT be the 16-bit serial_putc — its 3-byte `mov dx, imm16`
+; encoding (no 66 prefix) is misdecoded in 32-bit mode and eats the
+; following byte. War story #1, see Guides/How-to-debug.md.
+serial_putc32:
+    push eax
+    push edx
+    mov dx, 0x3FD               ; 66 BA FD 03 — 32-bit-correct encoding
+.1:
+    in al, dx
+    test al, 0x20               ; THR empty?
+    jz .1
+    mov al, [esp + 4]           ; saved EAX ([esp]=EDX, [esp+4]=EAX)
+    mov dx, 0x3F8
+    out dx, al
+    pop edx
+    pop eax
+    ret
+
+pm_entry:
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+    mov al, 'P'
+    call serial_putc32
+    jmp 0x08:0x100000           ; jump to kernel entry (entry.asm, 32-bit)
+
+; --- data ---
+msg_err db "AIkOS: disk read failed", 0
+boot_drive db 0
+
+align 4
+dap:
+    db 0x10                     ; DAP size
+    db 0                        ; reserved
+    dw KERNEL_SECTORS           ; sector count
+    dw KERNEL_LOAD_OFF          ; buffer offset
+    dw KERNEL_LOAD_SEG          ; buffer segment
+    dq 1                        ; LBA: kernel starts at sector 1
+
+; --- GDT (flat 32-bit) ---
+align 4
+gdt:
+    dq 0x0000000000000000       ; null descriptor
+    dw 0xFFFF, 0x0000, 0x9A00, 0x00CF  ; code: base 0, limit 4G, D=1, G=1, P=1, type 0xA
+    dw 0xFFFF, 0x0000, 0x9200, 0x00CF  ; data: base 0, limit 4G, D=1, G=1, P=1, type 0x2
+gdt_desc:
+    dw gdt_desc - gdt - 1
+    dd gdt
+
+times 510-($-$$) db 0
+dw 0xAA55

@@ -1,13 +1,38 @@
 # How to run AIkOS in QEMU
 
-> **Status:** placeholder — no bootable image exists yet (2026-08-05).
+> **Status:** current — Phase 0 verified commands (2026-08-05).
 
-Will contain the exact QEMU invocation used for development, including:
+## Canonical acceptance test
 
-- Headless flags (`-display none`, `-serial stdio`) for agent-driven testing
-- The QEMU monitor (`-monitor stdio`) for register/memory inspection
-- `screendump` for capturing the framebuffer as a PNG (so the GUI can be *looked at*)
-- gdb stub (`-s -S`) for kernel debugging
-- Network setup for Phase 5 (user-mode networking)
+```bash
+./test.sh        # builds, boots headless, greps serial log for the banner
+```
 
-**Updates go here as soon as the first bootable image exists — this is a high-traffic page.**
+## Manual runs
+
+```bash
+QEMU="/c/Program Files/qemu/qemu-system-x86_64.exe"
+
+# headless, serial to file (the standard debug run)
+"$QEMU" -drive file=build/disk.img,format=raw \
+        -serial file:build/serial.log -display none -no-reboot -m 32M
+
+# with monitor for registers/memory/screenshot
+(sleep 5; echo "screendump build/screen.ppm"; sleep 1; echo quit) | \
+"$QEMU" -drive file=build/disk.img,format=raw -serial file:build/serial.log \
+        -display none -no-reboot -m 32M -monitor stdio
+```
+
+## Gotchas
+
+- **A VM with no bootable disk never exits** — timeouts are expected, not failures. test.sh handles it.
+- **`screendump` outputs PPM, not PNG** (Windows can't open it): `python tools/ppm2png.py build/screen.ppm build/screen.png`.
+- **`-serial file:`** captures raw bytes — includes the boot-chain milestone characters (see How-to-debug.md).
+- QEMU 11 SeaBIOS: int 13h AH=42h reads **must** use a buffer below 1MB (see war story #2) — our boot sector handles this internally now.
+
+## Expected boot log (Phase 0, v0.1.0)
+
+```
+SBMALCP123456789KAIkOS v0.1.0
+Phase 0: long mode reached, halting.
+```

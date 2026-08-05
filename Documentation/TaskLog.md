@@ -7,6 +7,32 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-05 — 🎉 PHASE 0 COMPLETE — v0.1.0 boots!
+
+**Done:**
+- **`test.sh` GREEN**: full boot chain verified — `SBMALCP123456789KAIkOS v0.1.0` + `Phase 0: long mode reached, halting.` on serial; VGA banner visually confirmed via screendump.
+- Bugs slain (all in Guides/How-to-debug.md as war stories #1–5):
+  1. 16-bit serial routine called from 32-bit PM (encoding eats next byte)
+  2. QEMU 11 SeaBIOS hangs on AH=42h reads above 1MB → low-buffer + self-copy
+  3. PD fill started at base `0x200000` instead of 0 → identity map shifted 2MiB → the "zero walk"
+  4. UART is port-mapped I/O — C memory stores to 0x3F8 are silent → inline asm `outb`/`inb`
+  5. SysV ABI: char arg in DIL, not AL (kputc)
+- **Debug methodology proven**: serial milestone chars (one per boot stage) + `-d in_asm,cpu` traces + raw-byte serial dumps of buffers beat monitor forensics.
+- `tools/ppm2png.py` added (screendump is PPM; Windows can't open it).
+- `Guides/How-to-version-control.md` created (git rollback workflow, Q2 from Marcel).
+- Tagged **v0.1.0**, GitHub release with disk.img artifact (ADR-004).
+
+**Next:**
+- Phase 1 (The Machine Wakes): interrupts (IDT), PIT timer, PS/2 keyboard, kernel REPL over serial.
+- Phase 1 design doc first (per methodology).
+
+**Build state:** v0.1.0 — boots, prints banner, halts. 881-byte kernel.
+
+**Open questions:**
+- None blocking. Phase 1 design decisions (IDT layout, PIC vs APIC, timer choice) land in the Phase 1 design doc.
+
+---
+
 ## 2026-08-05 — Phase 0 decisions made; toolchain installed & verified
 
 **Done:**

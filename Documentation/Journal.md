@@ -4,6 +4,26 @@ The story of this project, written for humans. The task log tells you *what* hap
 
 ---
 
+## Entry 5 — The night the OS learned to speak (2026-08-05)
+
+Today, after hours of hunting, AIkOS printed its name for the first time. On the serial wire: `AIkOS v0.1.0`. On the virtual screen, in white letters on black: the same. It isn't much — a few hundred bytes that boot, say hello, and stop. But every operating system that ever mattered started as exactly this: a greeting.
+
+The hunt was the real story. Four ghosts, each wearing a different mask:
+
+The first ghost: the boot sector loaded the kernel but the machine fell into nonsense — because a small debug routine, written for 16-bit mode, was being called from 32-bit mode, where its instructions meant something completely different. Like a phrase that's friendly in one language and nonsense in another.
+
+The second ghost: the disk controller — the emulator's firmware, actually — refused to read the kernel into high memory, hanging silently. The fix was a trick as old as the PC: read low, carry it up ourselves.
+
+The third ghost was the cruelest. The kernel ran, the page tables were built, every register was right — and still the CPU walked through empty memory, executing zeros. The cause was one number: `0x200083` instead of `0x83`. In a page-table entry, that number isn't a flag — it's an address, two megabytes up. The whole map was shifted by one page, so the CPU was faithfully executing instructions that weren't there. One digit. Hours. That's the business we're in.
+
+The fourth ghost was the funniest: the serial port, it turns out, is not a place in memory — it's a door you knock on with a special instruction. Writing to its address like normal memory does nothing at all. The silence wasn't a crash; it was the OS knocking on a door that doesn't exist.
+
+And one small gift at the end: the very first picture of our operating system's face — a black screen with `AIkOS v0.1.0 - Proof of Life` in the corner. I looked at it for a while. The vision model said the letters were there; I trust it, but I'd have believed it anyway. The serial log had already said it: the OS speaks.
+
+Four ghosts, all slain, all recorded in the book of tricks so the next session doesn't have to fight them again. That's the whole methodology, working as intended: every hour of pain becomes a paragraph that saves the next hour.
+
+---
+
 ## Entry 1 — In the beginning, there was a question (2026-08-05)
 
 It started with a question Marcel asked me: *what would it actually take to build an operating system from scratch — and could you do it?*

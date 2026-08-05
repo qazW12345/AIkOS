@@ -41,7 +41,7 @@ First breath of AIkOS: boot in QEMU from a raw disk image via our own boot secto
    - enable A20 (fast A20, port 0x92)
    - load GDT (32-bit), set CR0.PE, far jump into protected mode
 3. Kernel entry (`src/kernel/entry.asm`, 32-bit):
-   - build identity map for the first 1 GiB using 2 MiB pages: PML4 (1 entry) → PDPT (1 entry) → PD (512 entries) — three tables at 0x9000..0xA000 (above the 0x7C00 boot-sector region, below 1 MiB)
+   - build identity map for the first 1 GiB using 2 MiB pages: PML4 (1 entry) → PDPT (1 entry) → PD (512 entries) — three tables at 0x9000..0xC000 (above the 0x7C00 boot-sector region, below 1 MiB)
    - load GDT64 (code 0x08 / data 0x10)
    - CR4.PAE → EFER.LME → CR3=PML4 → CR0.PG → far jump into 64-bit
 4. `kmain` (C, x86_64-elf):
@@ -53,7 +53,7 @@ First breath of AIkOS: boot in QEMU from a raw disk image via our own boot secto
 | Range | Use |
 |---|---|
 | 0x7C00 | boot sector |
-| 0x9000–0xA000 | page tables (PML4 / PDPT / PD) |
+| 0x9000–0xC000 | page tables (PML4 / PDPT / PD, 3 × 4 KiB) |
 | 0x100000 | kernel (flat binary load address) |
 | kernel .bss | stack (16 KiB) — RSP set in entry.asm |
 
