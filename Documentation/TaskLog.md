@@ -7,6 +7,26 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-05 — GitHub workflow decided; README added; from-scratch principle
+
+**Done:**
+- **ADR-003 (from-scratch principle)**: the OS itself is written from zero — bootloader, kernel, drivers, filesystem, GUI, language. Build toolchain is borrowed bootstrap only. Standards count as documentation, not code. Phase 6 (own compiler) is the culmination. Tilts Phase 0 toward a custom bootloader.
+- **ADR-004 (GitHub workflow)**: Releases per phase exit (tag + artifacts, phase not done until tagged); no Issues/PRs for now (TaskLog/Roadmap are the tracker — no dual source of truth); CI deferred until Phase 0 stabilizes; no Wiki.
+- **Root README.md** created — short human overview, GitHub-ready, structured like a normal public project.
+- Roadmap gained a Principles section; journal entry 4.
+
+**Next:**
+- Phase 0 toolchain: NASM + QEMU via winget, compiler TBD.
+- Phase 0 design doc (boot path decision: custom bootloader favored by ADR-003).
+
+**Build state:** docs only. 4 commits pushed (will be 5 after this entry).
+
+**Open questions:**
+- Compiler: clang/LLVM vs MSYS2 gcc vs OSDev cross-toolchain zip.
+- Boot path: custom bootloader (leaning, per ADR-003) vs Multiboot2/GRUB.
+
+---
+
 ## 2026-08-05 — GitHub backup live
 
 **Done:**

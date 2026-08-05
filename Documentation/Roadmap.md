@@ -25,6 +25,13 @@ The project plan. Every phase has an **exit criterion** — a phase is done when
 - **No networking before Phase 5.**
 - **No broad real-hardware driver support before Phase 7.** Emulator-first, always.
 
+## Principles
+
+- **From scratch** (ADR-003): the OS itself — bootloader, kernel, drivers, filesystem, GUI, language — is written from zero. The build toolchain (compiler, assembler, emulator) is borrowed bootstrap only, because you need a compiler before you can write a compiler.
+- **Completeness** (ADR-002): not a daily driver because no ecosystem will exist for it; complete = self-sufficient — our own shell, apps, tooling, compiler.
+- **Exit criteria are real** (ADR-004): a phase ships when its test demonstrably passes — and it ships as a tagged GitHub release (`v0.1.0`, `v0.2.0`, ...).
+- **Docs are code** (ADR-001): versioned, backed up, and the handoff mechanism between sessions.
+
 ## How the roadmap changes
 
 If reality disagrees with this roadmap, we don't silently edit it — we write an ADR explaining the change, then update the roadmap to match. The roadmap describes *where we are going*; ADRs describe *how we got here and why*.
@@ -32,4 +39,4 @@ If reality disagrees with this roadmap, we don't silently edit it — we write a
 ## Notes
 
 - Every phase gets its own mini design doc in `Design/` before implementation starts (written for the ambiguous parts only — if there's no trade-off to weigh, a design doc is overhead).
-- Phase 0 open questions (as of 2026-08-05): compiler choice (clang/LLVM vs MSYS2 gcc vs OSDev cross-toolchain zip); boot path (Multiboot2 via GRUB vs custom bootloader).
+- Phase 0 open questions (as of 2026-08-05): compiler choice (clang/LLVM vs MSYS2 gcc vs OSDev cross-toolchain zip); boot path (Multiboot2 via GRUB vs custom bootloader — from-scratch principle ADR-003 tilts toward custom; final call in the Phase 0 design doc).

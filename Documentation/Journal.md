@@ -44,3 +44,11 @@ So "complete" can't mean "runs everything" — it has to mean "needs nothing fro
 Today AIkOS got its first home away from home. The whole project — every document, every decision record, every word of this journal — now lives in a private repository on GitHub, a backup copy in case anything ever happens to this computer. Small thing, technically: a few git commands and a token. But it's the first time the project exists in two places at once, which feels like the difference between a notebook and a thing that's real.
 
 The authentication dance was funnier than it should have been — the official login flow failed twice, silently, the way bureaucracy fails: everything looks fine, nothing works. The workaround took thirty seconds. That's the whole project in miniature, honestly: the well-trodden path is paved with surprises, and the side path gets you there.
+
+---
+
+## Entry 4 — The from-scratch promise (2026-08-05)
+
+Marcel said it plainly: as much of AIkOS as possible should be created from scratch — so that it is *not a copy* of Windows or Linux. Not because borrowing is shameful, but because a copy can never be truly ours. The one honest exception is the toolchain: you need a compiler before you can write a compiler. Everything else — the bootloader, the kernel, the filesystem, the GUI, the language we'll one day speak to the machine — starts as a blank page.
+
+That promise is now written into the project's rules, where it can't be quietly forgotten. The long road just got a little longer. And a lot more ours.
