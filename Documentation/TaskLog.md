@@ -7,6 +7,23 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-05 — Phase 1.5 designed (The Senses)
+
+**Done:**
+- Decisions accepted (Marcel's order): **ADR-010** (scope: kprintf, RTC+time, CPUID, VGA scroll, keyboard REPL; ships as v0.3.0; set-2 + serial IRQ deferred again), **ADR-011** (GitHub Actions CI, supersedes ADR-004's deferral).
+- **Design doc**: `Design/Phase-1.5-The-Senses.md` — per-feature design (format spec, RTC UIP loop, CPUID leaves, VGA scroll, set-1 keymap + SPSC input queue, env.sh portability), test plan v3, risks.
+- **Roadmap**: Phase 1.5 row added between 1 and 2.
+
+**Next:**
+- Implement in order: printf → RTC → CPUID → VGA scroll → keyboard REPL → CI.
+- On green: tag v0.3.0 + release (ADR-004).
+
+**Build state:** v0.2.0 shipped; Phase 1.5 designed, not implemented.
+
+**Open questions:** none blocking — implementation follows the design doc.
+
+---
+
 ## 2026-08-05 — 🎉 PHASE 1 COMPLETE — v0.2.0: The Machine Wakes!
 
 **Done:**
