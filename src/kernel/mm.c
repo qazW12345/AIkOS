@@ -1,4 +1,10 @@
 // Physical memory manager (ADR-012): E820 discovery + bitmap page allocator.
+// Component: mm (physical memory manager)
+// Provides: pmm_init, pmm_alloc_page, pmm_free_page
+// Depends on: boot.asm (E820 entries @0x5000, count @0x4FFC),
+//             linker.ld (_kernel_start/_kernel_end)
+// Owns: bitmap @0xC000 (4 KiB, 128 MiB coverage); the E820 buffer 0x5000;
+//       reservation policy (low memory, kernel, page tables, user blobs)
 // One bit per 4 KiB page; static 4 KiB bitmap covers 128 MiB. Low memory
 // [0, 1 MiB) reserved wholesale; kernel, page tables, and user blobs
 // reserved explicitly. Returns 4 KiB-aligned physical addresses (identity

@@ -1,4 +1,8 @@
 // 8259A PIC driver (ADR-007): remap IRQs to 0x20-0x2F, mask, EOI.
+// Component: pic (8259A interrupt controller)
+// Provides: pic_init, pic_eoi, pic_is_spurious
+// Depends on: kernel.h (port I/O); nothing else
+// Owns: PIC registers 0x20/0x21, 0xA0/0xA1; IRQ remap 0x20-0x2F; mask state
 // IRQ0 = PIT timer, IRQ1 = PS/2 keyboard (the only two unmasked in Phase 1).
 
 #include "kernel.h"

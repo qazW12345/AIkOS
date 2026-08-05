@@ -1,4 +1,8 @@
 // hexdump — kernel-internal memory dump tool (debug workhorse for Phase 3).
+// Component: hexdump (memory dump tool)
+// Provides: hexdump(addr, len)
+// Depends on: serial (serial_putc), printf (kprintf)
+// Owns: (stateless — reads identity-mapped memory; len capped at 256)
 // Output format: one row per 16 bytes, CRLF-terminated
 // <8 lowercase hex digits of address>  <16 bytes as %02x single-space separated, with an extra space after the 8th byte>  |<16 ascii chars>|
 // ASCII column: chars 0x20..0x7E printable, everything else '.'. Address increments 16 per row.

@@ -2,6 +2,9 @@
 
 #ifndef AIKOS_KERNEL_H
 #define AIKOS_KERNEL_H
+// kernel.h — the component index (ADR-014). Every component declares its
+// public API here; the per-component contract (Provides / Depends on / Owns)
+// lives in each file's header block. Read a contract before its code.
 
 #include <stdint.h>
 

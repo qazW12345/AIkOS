@@ -1,4 +1,9 @@
 // Task state segment (ADR-013): RSP0 = kernel stack, used by the CPU for
+// Component: tss (task state segment)
+// Provides: tss_init
+// Depends on: entry.asm (gdt64 symbol, GDT slot 0x28 — the 16-byte 64-bit
+//             TSS descriptor), linker.ld (stack_top)
+// Owns: the TSS struct in .bss; RSP0 = kernel stack top
 // the ring-3 -> ring-0 stack switch on int 0x80 and on user interrupts.
 // Minimal: one TSS, single kernel stack (no preemptive multitasking yet —
 // per-process kernel stacks arrive with the Phase 3 scheduler).

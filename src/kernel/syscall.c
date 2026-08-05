@@ -1,4 +1,10 @@
 // Syscall dispatcher (ADR-013). Gate: int 0x80, DPL 3 (idt.c).
+// Component: syscall (int 0x80 dispatcher)
+// Provides: syscall_dispatch(isr_frame*)
+// Depends on: idt (gate 0x80), entry.asm (user_return), serial (write
+//             syscall), kernel.h (stack_top for the frame rewrite)
+// Owns: the syscall ABI (eax=number, rdi/rsi/rdx/r10); numbers 1=write,
+//       2=exit
 // ABI: number in eax, args in rdi/rsi/rdx/r10 (SysV-style).
 // Phase 2 syscalls: 1 = write(ptr, len), 2 = exit().
 

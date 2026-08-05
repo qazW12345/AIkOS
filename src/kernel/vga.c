@@ -1,4 +1,8 @@
 // Minimal VGA text mode driver — 80x25, buffer at 0xB8000.
+// Component: vga (text console)
+// Provides: vga_clear, vga_write_string
+// Depends on: kernel.h; nothing else
+// Owns: VGA text buffer 0xB8000-0xB8FA0 (80x25, attr 0x07); scroll state
 // Phase 1.5 (ADR-010): console scrolling — rows shift up, bottom row blanks.
 
 #include "kernel.h"

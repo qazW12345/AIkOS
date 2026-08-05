@@ -1,4 +1,11 @@
 // Processes (ADR-013): ring-3 programs in their own address space.
+// Component: proc (ring-3 processes)
+// Provides: proc_run, proc_run_fault; globals proc_kernel_rsp,
+//           proc_resume_addr, proc_resume_regs (consumed by entry.asm's
+//           user_return trampoline)
+// Depends on: mm (pmm_alloc_page), entry.asm (kernel PD @0xB000, user_return)
+// Owns: per-process page tables; the user region 0x200000-0x400000 (U/S);
+//       resume-capture state; the ring-3 entry/return machinery
 // Phase 2: one process at a time, but the full per-process page-table
 // machinery. The process PD copies the kernel's identity PD (supervisor)
 // and sets U/S only on the user region entries.

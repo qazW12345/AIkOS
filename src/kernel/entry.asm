@@ -1,4 +1,12 @@
 ; AIkOS kernel entry — 32-bit entry, builds identity map, enters long mode,
+; Component: entry (boot handoff + GDT + ring-3 trampoline)
+; Provides: _start, kputc, gdt64, user_return
+; Depends on: linker.ld (stack_top, _kernel_start/_kernel_end), boot.asm
+;             (user/fault blobs in low buffers 0x10000/0x14000)
+; Owns: GDT64 (null 0x00, kcode 0x08, kdata 0x10, ucode 0x18, udata 0x20,
+;       TSS slot 0x28 — 16-byte descriptor); page tables 0x9000-0xB000
+;       (PML4/PDPT/PD identity map); long-mode setup; user blob copy-up
+;       to 0x200000/0x220000; serial milestones 1-9,K
 ; jumps to kmain (C). ADR-006. Linked FIRST, load address 0x100000.
 ; Page tables: PML4 0x9000, PDPT 0xA000, PD 0xB000 (identity map, 1 GiB, 2 MiB pages).
 ; Serial milestones (COM1, debug): 1=entry 2=ptables 3=cr3 4=cr4 5=lme 6=pg 7=gdt64 8=longmode 9=stack K=kmain

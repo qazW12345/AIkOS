@@ -1,4 +1,10 @@
 // Kernel-mode REPL (ADR-008/010): shared SPSC input queue fed by polled
+// Component: repl (kernel command line)
+// Provides: repl_run (never returns), repl_input_putc (queue producer for
+//           keyboard IRQ / serial IRQ when it exists)
+// Depends on: serial (polled RX), printf (kprintf), vga, rtc, cpuid,
+//             proc (run/runfault), hexdump
+// Owns: the SPSC input queue; the line editor; command dispatch
 // serial AND the keyboard IRQ; line editor + commands.
 
 #include "kernel.h"

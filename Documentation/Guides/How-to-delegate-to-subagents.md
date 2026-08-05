@@ -53,6 +53,8 @@ Subagents have **no memory** of this conversation. Every brief must include:
 ```text
 Goal: <one sentence>
 Context: <exact file paths + current state + repo conventions to follow>
+Contracts: cite the component contract blocks (ADR-014) of the files you
+       touch — Provides / Depends on / Owns. Do not read the whole tree.
 Rules: match the existing style; KISS/DRY; do NOT invent output — if something
        fails or is missing, report it plainly.
 Verification: return absolute paths / exit codes / grep evidence for anything

@@ -7,6 +7,24 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-05 — ADR-014: Component Contract Methodology (modularity foundation)
+
+**Done:**
+- **ADR-014** (new): every component file carries a `Component / Provides / Depends on / Owns` header block; the contract is the unit of delegation and analysis (briefs cite contracts, never "read the tree"); build.sh derives its kernel source list; userland apps get the same discipline from Phase 3 on.
+- **Retrofitted contract blocks** on all 16 kernel C files + entry.asm/interrupt.asm/boot.asm; kernel.h declares itself the component index.
+- **build.sh refactor**: kernel source list is now a glob over `src/kernel/*.c` (entry.o/interrupt.o pinned first) — new components need zero build plumbing.
+- AGENTS.md + delegation-policy brief template updated to require contract citation.
+- **test.sh v5: 25/25 green** with the new build (kernel.bin 15,504 B — grew ~1 KB from link-order alignment, verified harmless).
+
+**Next:**
+- Phase 3 (Memory & Files) docs — now born modular: contracts in place, hexdump in the toolbox.
+
+**Build state:** v0.4.0 + hexdump + contracts; kernel.bin 15,504 B.
+
+**Open questions:** none blocking.
+
+---
+
 ## 2026-08-05 — hexdump tool shipped (first Nemotron real-world task)
 
 **Done:**

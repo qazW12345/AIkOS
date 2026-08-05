@@ -32,30 +32,16 @@ echo "[2/7] kernel assembly (entry + interrupt stubs)"
     -o build/entry.o src/kernel/entry.asm
 "$NASM" -f elf64 -o build/interrupt.o src/kernel/interrupt.asm
 
-echo "[3/7] kernel C"
-"$CLANG" --target=x86_64-elf $CFLAGS -c -o build/kmain.o    src/kernel/kmain.c
-"$CLANG" --target=x86_64-elf $CFLAGS -c -o build/serial.o   src/kernel/serial.c
-"$CLANG" --target=x86_64-elf $CFLAGS -c -o build/vga.o      src/kernel/vga.c
-"$CLANG" --target=x86_64-elf $CFLAGS -c -o build/idt.o      src/kernel/idt.c
-"$CLANG" --target=x86_64-elf $CFLAGS -c -o build/pic.o      src/kernel/pic.c
-"$CLANG" --target=x86_64-elf $CFLAGS -c -o build/pit.o      src/kernel/pit.c
-"$CLANG" --target=x86_64-elf $CFLAGS -c -o build/keyboard.o src/kernel/keyboard.c
-"$CLANG" --target=x86_64-elf $CFLAGS -c -o build/repl.o     src/kernel/repl.c
-"$CLANG" --target=x86_64-elf $CFLAGS -c -o build/printf.o   src/kernel/printf.c
-"$CLANG" --target=x86_64-elf $CFLAGS -c -o build/rtc.o      src/kernel/rtc.c
-"$CLANG" --target=x86_64-elf $CFLAGS -c -o build/cpuid.o    src/kernel/cpuid.c
-"$CLANG" --target=x86_64-elf $CFLAGS -c -o build/mm.o       src/kernel/mm.c
-"$CLANG" --target=x86_64-elf $CFLAGS -c -o build/tss.o      src/kernel/tss.c
-"$CLANG" --target=x86_64-elf $CFLAGS -c -o build/syscall.o  src/kernel/syscall.c
-"$CLANG" --target=x86_64-elf $CFLAGS -c -o build/proc.o     src/kernel/proc.c
-"$CLANG" --target=x86_64-elf $CFLAGS -c -o build/hexdump.o  src/kernel/hexdump.c
+echo "[3/7] kernel C (source list derived from the filesystem — ADR-014)"
+KOBJS=""
+for f in src/kernel/*.c; do
+    o="build/$(basename "$f" .c).o"
+    "$CLANG" --target=x86_64-elf $CFLAGS -c -o "$o" "$f"
+    KOBJS="$KOBJS $o"
+done
 
 echo "[4/7] link (entry.o first so the binary starts with _start)"
-"$LLD" -T linker.ld -o build/kernel.elf \
-    build/entry.o build/kmain.o build/serial.o build/vga.o build/interrupt.o \
-    build/idt.o build/pic.o build/pit.o build/keyboard.o build/repl.o \
-    build/printf.o build/rtc.o build/cpuid.o build/mm.o build/tss.o \
-    build/syscall.o build/proc.o build/hexdump.o
+"$LLD" -T linker.ld -o build/kernel.elf build/entry.o build/interrupt.o $KOBJS
 
 echo "[5/7] flat binaries"
 "$OBJCOPY" -O binary build/kernel.elf build/kernel.bin

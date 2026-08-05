@@ -1,4 +1,8 @@
 // CMOS RTC driver (ADR-010): wall clock for the REPL.
+// Component: rtc (CMOS wall clock)
+// Provides: rtc_read(sec, min, hour, day, month, year)
+// Depends on: kernel.h (port I/O); nothing else
+// Owns: CMOS ports 0x70/0x71; BCD regs 0/2/4/7/8/9 + century 0x32; UIP guard
 // Registers (BCD): 0=sec, 2=min, 4=hour, 7=day, 8=month, 9=year, 0x32=century.
 // Update-in-progress guard: wait UIP clear, read, re-read seconds, retry.
 

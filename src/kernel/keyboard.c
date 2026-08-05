@@ -1,4 +1,9 @@
 // PS/2 keyboard (ADR-010, superseding ADR-008's viewer role): set-1 keymap
+// Component: keyboard (PS/2, scancode set 1)
+// Provides: keyboard_irq (IRQ1 hook called by idt)
+// Depends on: repl (repl_input_putc — the shared SPSC input queue),
+//             kernel.h (port I/O)
+// Owns: PS/2 ports 0x60/0x64; IRQ1; set-1 keymap + shift state machine
 // (normal + shift), shift state machine; mapped keys feed the REPL input
 // queue. Scancodes still printed for debugging, now with the mapped char.
 

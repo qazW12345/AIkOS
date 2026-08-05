@@ -1,4 +1,9 @@
 // Minimal 16550 UART driver for COM1 (0x3F8) — the kernel's debug lifeline.
+// Component: serial (COM1 UART)
+// Provides: serial_init, serial_putc, serial_write_string, serial_write_hex,
+//           serial_write_dec, serial_rx_ready, serial_read_char
+// Depends on: kernel.h (port I/O); nothing else
+// Owns: COM1 ports 0x3F8-0x3FD; polled RX (no IRQ)
 // Phase 1: polled RX (REPL input) + hex/dec printers added.
 //
 // NOTE: the 16550 is PORT-mapped I/O — it requires the `out`/`in`

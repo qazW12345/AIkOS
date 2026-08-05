@@ -1,4 +1,9 @@
 ; AIkOS interrupt stubs — one per vector, common entry, C handler.
+; Component: interrupt (vector stubs + common entry)
+; Provides: isr_addr_table (256 addresses, vector order), isr_common
+; Depends on: idt.c (isr_handler, isr_frame layout — pushed GPR order)
+; Owns: stub-to-vector mapping (error-code/non-error split); the isr_frame
+;       stack layout contract (GPRs, vector, error, rip, cs, rflags, rsp, ss)
 ; ADR-007/009. Vectors 0-31 = CPU exceptions, 32-47 = IRQs (PIC remap),
 ; 48-255 reserved (unhandled -> panic).
 ; isr_addr_table: 256 addresses in vector order, consumed by idt.c.

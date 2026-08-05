@@ -1,4 +1,8 @@
 // PIT 8254 driver (ADR-007): 100 Hz square wave on IRQ0.
+// Component: pit (8254 timer)
+// Provides: pit_init, pit_tick (IRQ0 hook called by idt), pit_get_ticks
+// Depends on: kernel.h (port I/O); nothing else
+// Owns: PIT channel-0 registers 0x40-0x43; IRQ0; the 100 Hz tick counter
 
 #include "kernel.h"
 

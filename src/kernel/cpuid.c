@@ -1,4 +1,8 @@
 // CPUID (ADR-010): vendor, family/model/stepping, feature flags.
+// Component: cpuid (CPU identification)
+// Provides: cpuid_dump
+// Depends on: printf (kprintf)
+// Owns: (stateless — reads the CPU)
 
 #include "kernel.h"
 

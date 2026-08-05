@@ -1,4 +1,8 @@
 // kprintf — kernel print API (ADR-010). Streams to serial, no buffer.
+// Component: printf (kprintf engine)
+// Provides: kprintf (varargs)
+// Depends on: serial (serial_putc) — serial-only output
+// Owns: the format grammar (%c %s %d %u %x %ld %lu %lx %p %%, 0+width pad)
 // Format: %c %s %d %u %x (32-bit) | %ld %lu %lx (64-bit) | %p (16 hex) | %%
 // Optional '0' + width zero-pads %d/%u/%x (e.g. %02x, %02d).
 // NOTE: 32-bit and 64-bit args MUST be read with the right va_arg type —

@@ -1,4 +1,12 @@
 ; AIkOS boot sector — real mode, loads kernel.bin to 0x100000, enters protected mode.
+; Component: boot (real-mode boot sector)
+; Provides: the boot protocol — kernel + user blobs loaded, E820 map, A20,
+;           protected-mode handoff to entry.asm
+; Depends on: build.sh payload layout (KERNEL_SECTORS/USER_SECTORS/FAULT_*
+;             defines), BIOS int 13h/15h (hardware behavior, ADR-008 spirit)
+; Owns: disk layout contract (boot + kernel + user + userfault sectors);
+;       E820 buffer 0x5000 (count @0x4FFC); low read buffers 0x10000/0x14000;
+;       kernel copy to 0x100000 (0xFFFF:0x0010); serial milestones S,B,M,E,U,F
 ; ADR-006. Assembled with NASM -f bin, loaded by BIOS at 0x7C00.
 ; Kernel sector count is injected by build.sh (-D KERNEL_SECTORS).
 ;

@@ -1,4 +1,11 @@
 // IDT setup + interrupt/exception handling (ADR-007, ADR-009, ADR-013).
+// Component: idt (interrupt table + exception policy)
+// Provides: idt_init, isr_handler (called by interrupt.asm)
+// Depends on: interrupt.asm (isr_addr_table + isr_frame layout), syscall
+//             (0x80 gate), pic (EOI/spurious), pit, keyboard (IRQ hooks),
+//             entry.asm (user_return for the ring-3 fault path)
+// Owns: the IDT; gate 0x80 (DPL 3); exception policy (kernel panic vs
+//       user-fault-kill, ADR-009/013)
 
 #include "kernel.h"
 
