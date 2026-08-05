@@ -164,6 +164,18 @@ if grep -q "55 48 89 e5" build/hexdump.out; then ok "t9 hexdump shows user prog 
 if grep -q "200000" build/hexdump.out; then ok "t9 hexdump shows address"; else bad "t9 hexdump shows address"; fi
 if grep -q "bad address" build/hexdump.out; then ok "t9 hexdump bad address"; else bad "t9 hexdump bad address"; fi
 
+echo "[t10] unknown command handling"
+rm -f build/unknown.out
+# 'foobar\n' is 7 bytes — one write is fine per FIFO rule
+( sleep 2; printf 'foobar\n'; sleep 1 ) | \
+    "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
+    -no-reboot -m 32M > build/unknown.out 2>/dev/null &
+QPID=$!
+sleep 6
+kill "$QPID" 2>/dev/null || true
+wait "$QPID" 2>/dev/null || true
+if grep -q "unknown command (try help)" build/unknown.out; then ok "t10 unknown command"; else bad "t10 unknown command"; fi
+
 echo
 echo "RESULT: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]

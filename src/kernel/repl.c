@@ -4,8 +4,7 @@
 //           keyboard IRQ / serial IRQ when it exists)
 // Depends on: serial (polled RX), printf (kprintf), vga, rtc, cpuid,
 //             proc (run/runfault), hexdump
-// Owns: the SPSC input queue; the line editor; command dispatch
-// serial AND the keyboard IRQ; line editor + commands.
+// Owns: the SPSC input queue; the line editor; command dispatch table
 
 #include "kernel.h"
 
@@ -38,15 +37,6 @@ static int repl_input_getc(char *c)
     *c = inbuf[in_tail];
     in_tail = (in_tail + 1) % INBUF;
     return 1;
-}
-
-static int str_eq(const char *a, const char *b)
-{
-    while (*a && *b && *a == *b) {
-        a++;
-        b++;
-    }
-    return *a == *b;
 }
 
 static int is_hex_digit(char c)
@@ -87,92 +77,209 @@ static int parse_hex(const char *s, uint64_t *out)
     return any;
 }
 
+// Forward declarations for command handlers
+static void cmd_help(const char *args);
+static void cmd_echo(const char *args);
+static void cmd_ticks(const char *args);
+static void cmd_version(const char *args);
+static void cmd_panic(const char *args);
+static void cmd_time(const char *args);
+static void cmd_cpuid(const char *args);
+static void cmd_vga(const char *args);
+static void cmd_run(const char *args);
+static void cmd_runfault(const char *args);
+static void cmd_hexdump(const char *args);
+
+struct repl_cmd {
+    const char *name;                  /* command word, e.g. "echo" */
+    const char *usage;                 /* name + args hint for help, e.g. "echo <text>" */
+    void (*handler)(const char *args); /* args = text after the name, leading spaces stripped, "" if none */
+};
+
+static const struct repl_cmd cmd_table[] = {
+    { "help",        "help",                           cmd_help },
+    { "echo",        "echo <text>",                    cmd_echo },
+    { "ticks",       "ticks",                          cmd_ticks },
+    { "version",     "version",                        cmd_version },
+    { "panic",       "panic",                          cmd_panic },
+    { "time",        "time",                           cmd_time },
+    { "cpuid",       "cpuid",                          cmd_cpuid },
+    { "vga",         "vga",                            cmd_vga },
+    { "run",         "run",                            cmd_run },
+    { "runfault",    "runfault",                       cmd_runfault },
+    { "hexdump",     "hexdump <addr> <len>",           cmd_hexdump },
+};
+
+static int cmd_table_size(void)
+{
+    return sizeof(cmd_table) / sizeof(cmd_table[0]);
+}
+
+// Match command name at start of string, return pointer to args (after name + space)
+// or end-of-string. Returns 0 if no match.
+static const char *cmd_match(const char *cmd, const char *name)
+{
+    while (*name && *cmd && *name == *cmd) {
+        name++;
+        cmd++;
+    }
+    if (*name != '\0')
+        return 0;
+    if (*cmd == '\0')
+        return cmd;
+    if (*cmd == ' ')
+        return cmd + 1;
+    return 0;
+}
+
+static void cmd_help(const char *args)
+{
+    (void)args;
+    kprintf("commands: ");
+    int n = cmd_table_size();
+    for (int i = 0; i < n; i++) {
+        kprintf("%s", cmd_table[i].usage);
+        if (i + 1 < n)
+            kprintf(", ");
+    }
+    kprintf("\r\n");
+}
+
+static void cmd_echo(const char *args)
+{
+    while (*args == ' ')
+        args++;
+    if (*args != '\0')
+        kprintf("%s\r\n", args);
+}
+
+static void cmd_ticks(const char *args)
+{
+    (void)args;
+    kprintf("ticks: %lu\r\n", pit_get_ticks());
+}
+
+static void cmd_version(const char *args)
+{
+    (void)args;
+    kprintf("AIkOS v0.4.0 - Two Worlds\r\n");
+}
+
+static void cmd_panic(const char *args)
+{
+    (void)args;
+    kprintf("executing ud2\r\n");
+    __asm__ volatile("ud2");
+}
+
+static void cmd_time(const char *args)
+{
+    (void)args;
+    int s, mi, h, d, mo, y;
+    rtc_read(&s, &mi, &h, &d, &mo, &y);
+    kprintf("%04d-%02d-%02d %02d:%02d:%02d\r\n", y, mo, d, h, mi, s);
+}
+
+static void cmd_cpuid(const char *args)
+{
+    (void)args;
+    cpuid_dump();
+}
+
+static void cmd_vga(const char *args)
+{
+    (void)args;
+    char buf[12];
+    int i;
+    for (i = 0; i < 30; i++) {
+        char tmp[4];
+        int n = i, p = 0, t = 0;
+        buf[p++] = 'L'; buf[p++] = 'i'; buf[p++] = 'n'; buf[p++] = 'e';
+        buf[p++] = ' ';
+        if (n == 0)
+            tmp[t++] = '0';
+        while (n) {
+            tmp[t++] = (char)('0' + n % 10);
+            n /= 10;
+        }
+        while (t)
+            buf[p++] = tmp[--t];
+        buf[p++] = '\n';
+        buf[p] = '\0';
+        vga_write_string(buf);
+    }
+    kprintf("vga: 30 lines written\r\n");
+}
+
+static void cmd_run(const char *args)
+{
+    (void)args;
+    kprintf("entering ring 3...\r\n");
+    proc_run();                     /* returns after sys_exit / fault */
+    kprintf("back in kernel\r\n");
+}
+
+static void cmd_runfault(const char *args)
+{
+    (void)args;
+    kprintf("entering ring 3 (faulting program)...\r\n");
+    proc_run_fault();
+    kprintf("back in kernel\r\n");
+}
+
+static void cmd_hexdump(const char *args)
+{
+    while (*args == ' ')
+        args++;
+
+    if (*args == '\0') {
+        kprintf("hexdump: usage: hexdump <addr> <len>\r\n");
+        return;
+    }
+
+    // find second argument
+    const char *arg2 = args;
+    while (*arg2 && *arg2 != ' ')
+        arg2++;
+    if (*arg2 == '\0') {
+        kprintf("hexdump: usage: hexdump <addr> <len>\r\n");
+        return;
+    }
+
+    // make a modifiable copy for parsing
+    char buf[128];
+    int i = 0;
+    while (args + i < arg2 && i < 127) {
+        buf[i] = args[i];
+        i++;
+    }
+    buf[i] = '\0';
+
+    const char *len_str = arg2 + 1;
+    while (*len_str == ' ')
+        len_str++;
+
+    uint64_t addr, len;
+    if (!parse_hex(buf, &addr)) {
+        kprintf("hexdump: bad address\r\n");
+    } else if (!parse_hex(len_str, &len)) {
+        kprintf("hexdump: bad length\r\n");
+    } else {
+        hexdump(addr, len);
+    }
+}
+
 static void repl_exec(char *cmd)
 {
-    if (str_eq(cmd, "help")) {
-        kprintf("commands: help, echo <text>, ticks, version, panic, time, cpuid, vga, run, runfault, hexdump <addr> <len>\r\n");
-    } else if (cmd[0] == 'e' && cmd[1] == 'c' && cmd[2] == 'h' && cmd[3] == 'o' &&
-               cmd[4] == ' ' && cmd[5] != '\0') {
-        kprintf("%s\r\n", cmd + 5);
-    } else if (str_eq(cmd, "ticks")) {
-        kprintf("ticks: %lu\r\n", pit_get_ticks());
-    } else if (str_eq(cmd, "version")) {
-        kprintf("AIkOS v0.4.0 - Two Worlds\r\n");
-    } else if (str_eq(cmd, "panic")) {
-        kprintf("executing ud2\r\n");
-        __asm__ volatile("ud2");
-    } else if (str_eq(cmd, "time")) {
-        int s, mi, h, d, mo, y;
-        rtc_read(&s, &mi, &h, &d, &mo, &y);
-        kprintf("%04d-%02d-%02d %02d:%02d:%02d\r\n", y, mo, d, h, mi, s);
-    } else if (str_eq(cmd, "cpuid")) {
-        cpuid_dump();
-    } else if (str_eq(cmd, "vga")) {
-        char buf[12];
-        int i;
-        for (i = 0; i < 30; i++) {
-            char tmp[4];
-            int n = i, p = 0, t = 0;
-            buf[p++] = 'L'; buf[p++] = 'i'; buf[p++] = 'n'; buf[p++] = 'e';
-            buf[p++] = ' ';
-            if (n == 0)
-                tmp[t++] = '0';
-            while (n) {
-                tmp[t++] = (char)('0' + n % 10);
-                n /= 10;
-            }
-            while (t)
-                buf[p++] = tmp[--t];
-            buf[p++] = '\n';
-            buf[p] = '\0';
-            vga_write_string(buf);
+    int n = cmd_table_size();
+    for (int i = 0; i < n; i++) {
+        const char *args = cmd_match(cmd, cmd_table[i].name);
+        if (args) {
+            cmd_table[i].handler(args);
+            return;
         }
-        kprintf("vga: 30 lines written\r\n");
-    } else if (str_eq(cmd, "run")) {
-        kprintf("entering ring 3...\r\n");
-        proc_run();                     /* returns after sys_exit / fault */
-        kprintf("back in kernel\r\n");
-    } else if (str_eq(cmd, "runfault")) {
-        kprintf("entering ring 3 (faulting program)...\r\n");
-        proc_run_fault();
-        kprintf("back in kernel\r\n");
-    } else if (cmd[0] == 'h' && cmd[1] == 'e' && cmd[2] == 'x' && cmd[3] == 'd' &&
-               cmd[4] == 'u' && cmd[5] == 'm' && cmd[6] == 'p' && cmd[7] == ' ') {
-        const char *args = cmd + 8;
-        uint64_t addr, len;
-        char *arg2;
-
-        // skip leading spaces
-        while (*args == ' ')
-            args++;
-
-        if (*args == '\0') {
-            kprintf("hexdump: usage: hexdump <addr> <len>\r\n");
-        } else {
-            // find second argument
-            arg2 = (char *)args;
-            while (*arg2 && *arg2 != ' ')
-                arg2++;
-            if (*arg2 == '\0') {
-                kprintf("hexdump: usage: hexdump <addr> <len>\r\n");
-            } else {
-                *arg2 = '\0';
-                arg2++;
-                while (*arg2 == ' ')
-                    arg2++;
-
-                if (!parse_hex(args, &addr)) {
-                    kprintf("hexdump: bad address\r\n");
-                } else if (!parse_hex(arg2, &len)) {
-                    kprintf("hexdump: bad length\r\n");
-                } else {
-                    hexdump(addr, len);
-                }
-            }
-        }
-    } else {
-        kprintf("unknown command (try help)\r\n");
     }
+    kprintf("unknown command (try help)\r\n");
 }
 
 static void repl_handle(char c)
