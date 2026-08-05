@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# AIkOS Phase 1.5 acceptance tests (Design/Phase-1.5-The-Senses.md):
-#   t1 regression  — boot + banner (v0.3.0)
+# AIkOS Phase 2 acceptance tests (Design/Phase-2-Two-Worlds.md):
+#   t1 regression  — boot + banner (v0.4.0)
 #   t2 REPL        — help/echo/ticks over -serial stdio
 #   t3 keyboard    — scancodes + keyboard-typed command (sendkey)
 #   t4 panic       — ud2 -> exception dump + halt (ADR-009)
 #   t5 time        — RTC command (ADR-010)
 #   t6 cpuid       — CPUID command (ADR-010)
+#   t7 run         — ring-3 program syscalls out (ADR-013)
+#   t8 runfault    — user fault kills task, kernel lives (ADR-013)
 # Input chunking <=15 bytes with gaps: QEMU's stdio chardev bursts into the
 # 16550 RX FIFO and drops overflow (war story #6).
 set -euo pipefail
@@ -21,7 +23,7 @@ FAIL=0
 ok()  { echo "PASS: $1"; PASS=$((PASS+1)); }
 bad() { echo "FAIL: $1"; FAIL=$((FAIL+1)); }
 
-echo "[t1] Phase 0/1 regression (boot + banner)"
+echo "[t1] Phase 0/1/1.5 regression (boot + banner)"
 rm -f build/serial.log
 "$PYTHON" - "$QEMU" <<'PYEOF'
 import subprocess, sys
@@ -32,8 +34,8 @@ try:
 except subprocess.TimeoutExpired:
     pass
 PYEOF
-if grep -q "AIkOS v0.3.0" build/serial.log; then ok "t1 boot banner"; else bad "t1 boot banner"; fi
-if grep -q "The Senses" build/serial.log; then ok "t1 phase line"; else bad "t1 phase line"; fi
+if grep -q "AIkOS v0.4.0" build/serial.log; then ok "t1 boot banner"; else bad "t1 boot banner"; fi
+if grep -q "Two Worlds" build/serial.log; then ok "t1 phase line"; else bad "t1 phase line"; fi
 
 echo "[t2] REPL over serial (piped input)"
 rm -f build/repl.out
@@ -117,6 +119,34 @@ kill "$QPID" 2>/dev/null || true
 wait "$QPID" 2>/dev/null || true
 if grep -q "cpuid: vendor" build/cpuid.out; then ok "t6 vendor"; else bad "t6 vendor"; fi
 if grep -q "cpuid: family" build/cpuid.out; then ok "t6 family"; else bad "t6 family"; fi
+
+echo "[t7] ring-3 program syscalls out (ADR-013)"
+rm -f build/user.out
+( sleep 2; printf 'run\n'; sleep 4 ) | \
+    "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
+    -no-reboot -m 32M > build/user.out 2>/dev/null &
+QPID=$!
+sleep 9
+kill "$QPID" 2>/dev/null || true
+wait "$QPID" 2>/dev/null || true
+if grep -q "SYSCALL 1 (write)" build/user.out; then ok "t7 syscall write"; else bad "t7 syscall write"; fi
+if grep -q "hello from ring 3" build/user.out; then ok "t7 user text"; else bad "t7 user text"; fi
+if grep -q "user exited" build/user.out; then ok "t7 syscall exit"; else bad "t7 syscall exit"; fi
+if grep -q "back in kernel" build/user.out; then ok "t7 kernel survives"; else bad "t7 kernel survives"; fi
+
+echo "[t8] user fault kills task, kernel lives (ADR-013)"
+rm -f build/fault.out
+( sleep 2; printf 'runfault\n'; sleep 4 ) | \
+    "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
+    -no-reboot -m 32M > build/fault.out 2>/dev/null &
+QPID=$!
+sleep 9
+kill "$QPID" 2>/dev/null || true
+wait "$QPID" 2>/dev/null || true
+if grep -q "USER FAULT" build/fault.out; then ok "t8 user fault caught"; else bad "t8 user fault caught"; fi
+if grep -q "GENERAL PROTECTION" build/fault.out; then ok "t8 fault named"; else bad "t8 fault named"; fi
+if grep -q "user program terminated" build/fault.out; then ok "t8 task killed"; else bad "t8 task killed"; fi
+if grep -q "back in kernel" build/fault.out; then ok "t8 kernel survives"; else bad "t8 kernel survives"; fi
 
 echo
 echo "RESULT: $PASS passed, $FAIL failed"

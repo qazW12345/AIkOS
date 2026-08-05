@@ -7,6 +7,23 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-05 — 🎉 PHASE 2 COMPLETE — v0.4.0: Two Worlds
+
+**Done:**
+- Implemented per `Design/Phase-2-Two-Worlds.md` (ADR-012/013): **mm.c** (E820 + bitmap allocator), **tss.c** (RSP0 = kernel stack), **syscall.c** (`int 0x80`: write/exit), **proc.c** (per-process PML4/PDPT/PD, U/S only on the user region, resume-capture trampoline), **idt.c** (DPL-3 gate 0x80, user faults kill the task), boot.asm (E820 + two more DAP reads, milestones E/U/F), entry.asm (user GDT segments, 16-byte TSS slot, blob copy-up, user_return), **user/main.c** (syscall round-trip) + **user/fault.c** (deliberate #GP), build.sh 3-payload image, **test.sh v4 = 22 checks**.
+- Debugging saga (war stories #7–9 in How-to-debug): U/S needed at ALL paging levels (0x7 on PML4/PDPT); same-ring iretq validates SS.RPL (leftover user SS → #GP(0x20), rewrite ss/rsp too); the REPL chain is eaten by interrupt frames + user register clobbering — capture resume addr + callee-saved regs via [rbp]/[rbp+8] (compiler prologue breaks [rsp] capture), park the stack 4 KiB down, trampoline restores + jumps.
+- **test.sh v4: 22/22 green** (t7: `SYSCALL 1 (write)` + `hello from ring 3` + exit + kernel survives; t8: `USER FAULT 13` + task killed + kernel survives; t1–t6 regression clean), confirmed twice.
+- Tagged **v0.4.0**, GitHub release with disk.img (49,664 B).
+
+**Next:**
+- Phase 3 (Memory & Files): buddy allocator candidate, filesystem, ELF loader, first /bin apps.
+
+**Build state:** v0.4.0 shipped; kernel.bin 14,144 B; disk.img 49,664 B (97 sectors).
+
+**Open questions:** none blocking.
+
+---
+
 ## 2026-08-05 — Phase 2 designed (Two Worlds)
 
 **Done:**

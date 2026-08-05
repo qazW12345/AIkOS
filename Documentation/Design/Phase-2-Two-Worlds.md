@@ -77,9 +77,9 @@ Privilege separation: ring-3 programs in their own address spaces, hardware only
 
 ## Test plan (test.sh v4)
 
-- **t7** `run`: grep `SYSCALL 1 (write)` + `hello from ring 3` + `user exited` — the syscall round-trip.
-- **t8** `runfault`: grep `USER FAULT` + `GENERAL PROTECTION` + a fresh `AIkOS>` prompt *after* the fault — the kernel survives user misbehavior.
-- t1–t6: unchanged regression (14 checks). Total ≈ 19–20 checks.
+- **t7** `run`: grep `SYSCALL 1 (write)` + `hello from ring 3` + `user exited` + `back in kernel` — the syscall round-trip and the return home.
+- **t8** `runfault`: grep `USER FAULT` + `GENERAL PROTECTION` + `user program terminated` + `back in kernel` — the kernel survives user misbehavior.
+- t1–t6: unchanged regression (14 checks). Total: **22 checks** (v4).
 
 **Exit criterion:** test.sh v4 all green locally + CI green → tag **v0.4.0** + release with disk.img (ADR-004).
 

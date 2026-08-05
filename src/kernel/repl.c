@@ -46,14 +46,14 @@ static int str_eq(const char *a, const char *b)
 static void repl_exec(char *cmd)
 {
     if (str_eq(cmd, "help")) {
-        kprintf("commands: help, echo <text>, ticks, version, panic, time, cpuid, vga\r\n");
+        kprintf("commands: help, echo <text>, ticks, version, panic, time, cpuid, vga, run, runfault\r\n");
     } else if (cmd[0] == 'e' && cmd[1] == 'c' && cmd[2] == 'h' && cmd[3] == 'o' &&
                cmd[4] == ' ' && cmd[5] != '\0') {
         kprintf("%s\r\n", cmd + 5);
     } else if (str_eq(cmd, "ticks")) {
         kprintf("ticks: %lu\r\n", pit_get_ticks());
     } else if (str_eq(cmd, "version")) {
-        kprintf("AIkOS v0.3.0 - The Senses\r\n");
+        kprintf("AIkOS v0.4.0 - Two Worlds\r\n");
     } else if (str_eq(cmd, "panic")) {
         kprintf("executing ud2\r\n");
         __asm__ volatile("ud2");
@@ -84,6 +84,14 @@ static void repl_exec(char *cmd)
             vga_write_string(buf);
         }
         kprintf("vga: 30 lines written\r\n");
+    } else if (str_eq(cmd, "run")) {
+        kprintf("entering ring 3...\r\n");
+        proc_run();                     /* returns after sys_exit / fault */
+        kprintf("back in kernel\r\n");
+    } else if (str_eq(cmd, "runfault")) {
+        kprintf("entering ring 3 (faulting program)...\r\n");
+        proc_run_fault();
+        kprintf("back in kernel\r\n");
     } else {
         kprintf("unknown command (try help)\r\n");
     }

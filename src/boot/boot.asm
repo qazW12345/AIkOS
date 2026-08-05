@@ -16,11 +16,25 @@
 %ifndef KERNEL_SECTORS
 %define KERNEL_SECTORS 64
 %endif
+%ifndef USER_SECTORS
+%define USER_SECTORS 16
+%endif
+%ifndef FAULT_SECTORS
+%define FAULT_SECTORS 16
+%endif
+%ifndef USER_LBA
+%define USER_LBA 65              ; 1 boot + 64 kernel sectors
+%endif
+%ifndef FAULT_LBA
+%define FAULT_LBA 81             ; + 16 user sectors
+%endif
 
 KERNEL_LOAD_SEG  equ 0x1000      ; low read buffer: 0x1000:0x0000 = 0x10000
 KERNEL_LOAD_OFF  equ 0x0000
 KERNEL_DEST_SEG  equ 0xFFFF      ; final destination: 0xFFFF:0x0010 = 0x100000
 KERNEL_DEST_OFF  equ 0x0010
+USER_LOAD_SEG    equ 0x1000      ; user blob low buffer: 0x10000 (reused)
+FAULT_LOAD_SEG   equ 0x1400      ; fault blob low buffer: 0x14000
 
 start:
     cli
@@ -36,11 +50,12 @@ start:
     call serial_putc
 
     ; --- load kernel via int 13h AH=42h (LBA extensions) to LOW buffer ---
-    mov si, dap
-    mov ah, 0x42
-    mov dl, [boot_drive]
-    int 0x13
-    jc disk_error
+    mov ax, KERNEL_SECTORS
+    mov ebx, 1
+    mov cx, KERNEL_LOAD_SEG
+    mov es, cx
+    xor di, di
+    call read_sectors
 
     mov al, 'B'
     call serial_putc
@@ -59,6 +74,51 @@ start:
     mov ds, ax
 
     mov al, 'M'
+    call serial_putc
+
+    ; --- collect E820 memory map into 0x5000 (count word at 0x4FFC) ---
+    xor ax, ax
+    mov es, ax
+    xor ebx, ebx
+    mov di, 0x5000
+    xor bp, bp                  ; entry count
+.e820_loop:
+    mov eax, 0xE820
+    mov edx, 0x534D4150         ; 'SMAP'
+    mov ecx, 24
+    int 0x15
+    jc .e820_done
+    cmp eax, 0x534D4150         ; BIOS must echo SMAP
+    jne .e820_done
+    add di, 24
+    inc bp
+    cmp bp, 64                  ; cap: 64 * 24 = 1536 bytes < table
+    jae .e820_done
+    test ebx, ebx               ; EBX == 0 -> last entry
+    jz .e820_done
+    jmp .e820_loop
+.e820_done:
+    mov word [0x4FFC], bp
+    mov al, 'E'
+    call serial_putc
+
+    ; --- load user blobs to low buffers (real mode can't reach 2 MB);
+    ;     entry.asm copies them up in long mode ---
+    mov ax, USER_SECTORS
+    mov ebx, USER_LBA
+    mov cx, USER_LOAD_SEG
+    mov es, cx
+    xor di, di
+    call read_sectors
+    mov al, 'U'
+    call serial_putc
+    mov ax, FAULT_SECTORS
+    mov ebx, FAULT_LBA
+    mov cx, FAULT_LOAD_SEG
+    mov es, cx
+    xor di, di
+    call read_sectors
+    mov al, 'F'
     call serial_putc
 
     ; --- enable A20 (fast A20, port 0x92) ---
@@ -92,6 +152,19 @@ disk_error:
 .hang:
     hlt
     jmp .hang
+
+; --- int 13h AH=42h helper: ax=sectors, ebx=LBA, es:di=buffer ---
+read_sectors:
+    mov [dap + 2], ax
+    mov [dap + 8], ebx
+    mov [dap + 4], di
+    mov [dap + 6], es
+    mov si, dap
+    mov ah, 0x42
+    mov dl, [boot_drive]
+    int 0x13
+    jc disk_error
+    ret
 
 ; --- debug: emit char in AL to COM1 (works in real mode) ---
 serial_putc:

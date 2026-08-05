@@ -1,4 +1,4 @@
-// IDT setup + interrupt/exception handling (ADR-007, ADR-009).
+// IDT setup + interrupt/exception handling (ADR-007, ADR-009, ADR-013).
 
 #include "kernel.h"
 
@@ -17,14 +17,6 @@ struct idt_ptr {
     uint64_t base;
 } __attribute__((packed));
 
-// Layout must match interrupt.asm's common entry pushes exactly.
-struct isr_frame {
-    uint64_t r15, r14, r13, r12, r11, r10, r9, r8;
-    uint64_t rbp, rdi, rsi, rdx, rcx, rbx, rax;
-    uint64_t vector, error_code;
-    uint64_t rip, cs, rflags, rsp, ss;
-};
-
 extern uint64_t isr_addr_table[256];
 
 static struct idt_entry idt[256];
@@ -40,12 +32,12 @@ static const char *const exception_names[32] = {
     "RESERVED", "RESERVED", "RESERVED", "RESERVED"
 };
 
-static void idt_set(int n, uint64_t addr)
+static void idt_set(int n, uint64_t addr, uint8_t attr)
 {
     idt[n].offset_low = addr & 0xFFFF;
     idt[n].selector = 0x08;          // kernel code segment
     idt[n].ist = 0;
-    idt[n].type_attr = 0x8E;         // present, DPL 0, interrupt gate
+    idt[n].type_attr = attr;         // present, DPL in attr
     idt[n].offset_mid = (addr >> 16) & 0xFFFF;
     idt[n].offset_high = (addr >> 32) & 0xFFFFFFFF;
     idt[n].zero = 0;
@@ -57,7 +49,8 @@ void idt_init(void)
     struct idt_ptr ptr;
 
     for (i = 0; i < 256; i++)
-        idt_set(i, isr_addr_table[i]);
+        idt_set(i, isr_addr_table[i], 0x8E);   // interrupt gate, DPL 0
+    idt_set(0x80, isr_addr_table[0x80], 0xEE); // int 0x80: DPL 3 (ADR-013)
 
     ptr.limit = (uint16_t)(sizeof(idt) - 1);
     ptr.base = (uint64_t)idt;
@@ -81,8 +74,32 @@ static void panic_halt(void)
 
 void isr_handler(struct isr_frame *f)
 {
+    if (f->vector == 0x80) {             // syscall gate (ADR-013)
+        syscall_dispatch(f);
+        return;
+    }
     if (f->vector < 32) {
-        // CPU exception -> panic-and-halt with evidence (ADR-009)
+        if ((f->cs & 3) == 3) {
+            // user-mode fault (ADR-013): kill the task, kernel lives.
+            kprintf("\r\nUSER FAULT %d (%s) error=%lx", (int)f->vector,
+                    exception_names[f->vector], f->error_code);
+            if (f->vector == 14) {
+                uint64_t cr2;
+                __asm__ volatile("mov %%cr2, %0" : "=r"(cr2));
+                kprintf(" cr2=%lx", cr2);
+            }
+            kprintf("\r\n");
+            dump_frame(f);
+            kprintf("user program terminated\r\n");
+            /* Full frame-tail rewrite for a same-ring return (ADR-013):
+             * iretq validates SS.RPL == CPL — the user SS (0x23) must go. */
+            f->cs = 0x08;
+            f->ss = 0x10;
+            f->rsp = (uint64_t)stack_top;
+            f->rip = (uint64_t)user_return;
+            return;
+        }
+        // CPU exception from the kernel -> panic-and-halt (ADR-009)
         kprintf("\r\nEXCEPTION %d (%s) error=%lx", (int)f->vector,
                 exception_names[f->vector], f->error_code);
         if (f->vector == 14) {

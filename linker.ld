@@ -16,5 +16,8 @@ SECTIONS
         stack_bottom = .;
         . = . + 0x4000;         /* 16 KiB kernel stack */
         stack_top = .;
+        _kernel_end = .;
     }
+
+    _kernel_start = 0x100000;
 }

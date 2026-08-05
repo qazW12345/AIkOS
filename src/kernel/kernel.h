@@ -5,6 +5,20 @@
 
 #include <stdint.h>
 
+/* interrupt frame — layout must match interrupt.asm's common entry exactly */
+struct isr_frame {
+    uint64_t r15, r14, r13, r12, r11, r10, r9, r8;
+    uint64_t rbp, rdi, rsi, rdx, rcx, rbx, rax;
+    uint64_t vector, error_code;
+    uint64_t rip, cs, rflags, rsp, ss;
+};
+
+/* entry.asm: kernel trampoline that returns to the REPL call chain */
+void user_return(void);
+
+/* linker.ld: top of the 16 KiB kernel stack (TSS RSP0, frame hygiene) */
+extern char stack_top[];
+
 /* port I/O — inline here: several drivers need it (serial.c, pic.c, ...) */
 static inline void outb(unsigned short port, unsigned char val)
 {
@@ -59,5 +73,22 @@ void cpuid_dump(void);
 /* repl.c */
 void repl_run(void);
 void repl_input_putc(char c);
+
+/* mm.c — physical memory (ADR-012) */
+void pmm_init(void);
+void *pmm_alloc_page(void);
+void pmm_free_page(void *page);
+
+/* tss.c — task state segment (ADR-013) */
+void tss_init(void);
+
+/* syscall.c — int 0x80 dispatcher (ADR-013) */
+void syscall_dispatch(struct isr_frame *f);
+
+/* proc.c — ring-3 processes (ADR-013) */
+void proc_run(void);
+void proc_run_fault(void);
+extern uint64_t proc_kernel_rsp;   /* parked stack (below interrupt-frame zone) */
+extern uint64_t proc_resume_addr;  /* REPL resume point (captured value) */
 
 #endif

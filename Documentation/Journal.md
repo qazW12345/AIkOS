@@ -36,6 +36,18 @@ Three milestones down: proof of life, then senses, then — one day — a world 
 
 ---
 
+## Entry 8 — Two Worlds (2026-08-05)
+
+The machine that could listen learned to be two machines at once.
+
+Phase 2 was the cage: programs now run in ring 3 — a world the kernel builds for them, where they can't touch hardware, can't read the kernel's memory, and can only talk to the OS through one narrow door: a syscall. We wrote two tiny programs to prove it. The first said `hello from ring 3` — printed through that door, one syscall at a time — and then walked out, and the kernel went right back to its command prompt, unharmed. The second was a troublemaker on purpose: it tried to seize a control register it has no right to touch, the CPU slapped it with a general-protection fault, and the kernel — which a year of engineering instinct says should have died with it — simply said "user program terminated" and kept listening. The cage held. The test suite's name for that last check is `t8 kernel survives`, and seeing it go green felt like watching a seatbelt work for the first time.
+
+The ghosts this time were subtler than the first four. A page-table bit that must be set at *three* levels, not one. A CPU that validates the stack segment's privilege even when it isn't using it. And the cruelest: a call chain that existed in memory until the moment an interrupt frame landed on top of it — the machine's own housekeeping erasing the road home. Each ghost is now a war story in the book, paragraphs that will save the next session hours.
+
+Between the two worlds: a memory manager that knows the real map of RAM, a task-state segment so the CPU knows where the kernel's hat hangs, and an address space per process. The kernel is 14,144 bytes now, and it dreams in rings.
+
+---
+
 ## Entry 7 — The Senses (2026-08-05)
 
 The machine learned to feel itself. In this round, AIkOS gained five small senses and one big one.
