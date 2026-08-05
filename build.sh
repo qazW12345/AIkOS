@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2086   # $CFLAGS etc. are intentionally word-split
 # AIkOS build script (ADR-005) — nasm -> clang -> ld.lld -> objcopy -> disk image.
 # Toolchain paths come from env.sh (platform-aware, ADR-011).
 # Phase 2 (ADR-012/013): disk image = boot + kernel + user + userfault blobs.
