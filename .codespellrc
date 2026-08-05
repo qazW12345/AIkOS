@@ -1,0 +1,5 @@
+# codespell config (super-linter SPELL_CODESPELL_CONFIG_FILE)
+[default]
+ignore-words-list = ist
+# "ist" is the x86 IDT Interrupt Stack Table field (idt[n].ist, tss.ist[7]),
+# not a typo.
