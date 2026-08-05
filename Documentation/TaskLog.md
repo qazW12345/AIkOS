@@ -7,6 +7,27 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-05 — Phase 0 decisions made; toolchain installed & verified
+
+**Done:**
+- **ADR-005** (toolchain): clang/LLVM + NASM + bash build script — all recommendations accepted by Marcel.
+- **ADR-006** (boot path): custom boot sector; long mode in kernel entry; 64-bit from day one.
+- **Design doc written and accepted**: `Design/Phase-0-Proof-of-Life.md` — boot sequence, memory map, disk layout, serial/VGA strategy, acceptance test, risks.
+- **Roadmap**: Phase 0 exit criterion refined (test.sh green + screendump + tagged v0.1.0).
+- **Toolchain installed & smoke-verified**: NASM 3.02 (per-user, `AppData\Local\bin\NASM`), clang 22.1.8 + lld + llvm-objcopy (`Program Files\LLVM\bin`), QEMU 11.0.50 (`Program Files\qemu`). Freestanding `x86_64-elf` compile → ELF64 object ✅; `nasm -f elf64` ✅; QEMU launches ✅.
+- Install paths recorded in `Guides/How-to-build.md` (PATH caveat: resolve absolute paths in scripts).
+
+**Next:**
+- Write `build.sh` + `test.sh` + sources: `src/boot/boot.asm`, `src/kernel/entry.asm`, `src/kernel/kmain.c`, `serial.c`, `vga.c`, `linker.ld`.
+- First boot attempt in QEMU — serial log is the lifeline.
+- On green: tag v0.1.0 + GitHub release with disk.img (ADR-004).
+
+**Build state:** documentation + verified toolchain; zero kernel code yet.
+
+**Open questions:** none blocking — implementation follows the design doc.
+
+---
+
 ## 2026-08-05 — GitHub workflow decided; README added; from-scratch principle
 
 **Done:**

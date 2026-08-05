@@ -8,7 +8,7 @@ The project plan. Every phase has an **exit criterion** — a phase is done when
 
 | # | Phase | Goal | Exit criterion | Status |
 |---|---|---|---|---|
-| 0 | Proof of Life | Boot in QEMU; banner on VGA + serial console | QEMU boots it; serial log shows banner; clean state on exit | ⬜ not started |
+| 0 | Proof of Life | Boot in QEMU; banner on VGA + serial console | `test.sh` green (headless QEMU boot, serial log contains `AIkOS v0.1.0`); VGA banner verified via screendump; tagged release v0.1.0 | ⬜ not started |
 | 1 | The Machine Wakes | Interrupts, timer ticks, PS/2 keyboard, kernel-mode REPL | Type into the REPL over serial, see echo | ⬜ |
 | 2 | Two Worlds | Paging, user mode, syscalls | A ring-3 process runs and syscalls out | ⬜ |
 | 3 | Memory & Files | Allocators, filesystem, ELF loader, first userland apps | Boots from disk image; runs /bin apps | ⬜ |
@@ -39,4 +39,4 @@ If reality disagrees with this roadmap, we don't silently edit it — we write a
 ## Notes
 
 - Every phase gets its own mini design doc in `Design/` before implementation starts (written for the ambiguous parts only — if there's no trade-off to weigh, a design doc is overhead).
-- Phase 0 open questions (as of 2026-08-05): compiler choice (clang/LLVM vs MSYS2 gcc vs OSDev cross-toolchain zip); boot path (Multiboot2 via GRUB vs custom bootloader — from-scratch principle ADR-003 tilts toward custom; final call in the Phase 0 design doc).
+- Phase 0 decisions made (2026-08-05): **ADR-005** (toolchain: clang/LLVM + NASM + bash build script), **ADR-006** (boot: custom boot sector, long mode in kernel entry). Design: `Design/Phase-0-Proof-of-Life.md`.
