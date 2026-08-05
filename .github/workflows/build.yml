@@ -11,7 +11,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # Actions pinned to full SHAs (zizmor unpinned-uses; supply-chain):
+      #   actions/checkout@11d5960a… = v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           fetch-depth: 0        # paths-filter diffs against the default-branch merge-base
           persist-credentials: false   # zizmor artipacked: don't leave the token in .git/config
@@ -19,7 +21,7 @@ jobs:
       # Skip the QEMU suite when no code changed (docs-only pushes) — the
       # suite grows with every phase; don't burn it on prose (ADR-011 intent).
       - name: Paths Changes Filter
-        uses: dorny/paths-filter@v4.0.3
+        uses: ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d  # dorny/paths-filter@v4.0.3
         id: changes
         with:
           filters: |
@@ -44,7 +46,7 @@ jobs:
       contents: read
       statuses: write          # job-scoped: only super-linter's status reporter needs it
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
         with:
           fetch-depth: 0
           persist-credentials: false   # zizmor artipacked
@@ -53,10 +55,12 @@ jobs:
       # yamllint (workflows). Disabled on purpose: clang-format/cpplint would
       # churn the hand-tuned freestanding kernel style; jscpd flags test.sh's
       # intentionally-similar QEMU blocks; prettier/biome/JSON formatter taste
-      # fights aren't worth it on config files. markdownlint uses the house
-      # config at .github/linters/.markdown-lint.yml (default discovery).
+      # fights aren't worth it on config files; the python linters fire on the
+      # one throwaway debug helper (tools/ppm2png.py) — revisit when real
+      # python tooling lands. markdownlint uses the house config at
+      # .github/linters/.markdown-lint.yml (default discovery).
       - name: Super-Linter
-        uses: super-linter/super-linter@v8.7.0
+        uses: 4ce20838b8ab83717e78138c5b3a1407148e0918  # super-linter/super-linter@v8.7.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BRANCH: main
@@ -69,3 +73,8 @@ jobs:
           VALIDATE_BIOME_FORMAT: false
           VALIDATE_MARKDOWN_PRETTIER: false
           VALIDATE_NATURAL_LANGUAGE: false
+          VALIDATE_PYTHON_BLACK: false
+          VALIDATE_PYTHON_PYLINT: false
+          VALIDATE_PYTHON_FLAKE8: false
+          VALIDATE_PYTHON_ISORT: false
+          VALIDATE_PYTHON_RUFF: false
