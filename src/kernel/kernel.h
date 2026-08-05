@@ -91,4 +91,7 @@ void proc_run_fault(void);
 extern uint64_t proc_kernel_rsp;   /* parked stack (below interrupt-frame zone) */
 extern uint64_t proc_resume_addr;  /* REPL resume point (captured value) */
 
+/* hexdump.c — memory dump tool */
+void hexdump(uint64_t addr, uint64_t len);
+
 #endif

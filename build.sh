@@ -48,13 +48,14 @@ echo "[3/7] kernel C"
 "$CLANG" --target=x86_64-elf $CFLAGS -c -o build/tss.o      src/kernel/tss.c
 "$CLANG" --target=x86_64-elf $CFLAGS -c -o build/syscall.o  src/kernel/syscall.c
 "$CLANG" --target=x86_64-elf $CFLAGS -c -o build/proc.o     src/kernel/proc.c
+"$CLANG" --target=x86_64-elf $CFLAGS -c -o build/hexdump.o  src/kernel/hexdump.c
 
 echo "[4/7] link (entry.o first so the binary starts with _start)"
 "$LLD" -T linker.ld -o build/kernel.elf \
     build/entry.o build/kmain.o build/serial.o build/vga.o build/interrupt.o \
     build/idt.o build/pic.o build/pit.o build/keyboard.o build/repl.o \
     build/printf.o build/rtc.o build/cpuid.o build/mm.o build/tss.o \
-    build/syscall.o build/proc.o
+    build/syscall.o build/proc.o build/hexdump.o
 
 echo "[5/7] flat binaries"
 "$OBJCOPY" -O binary build/kernel.elf build/kernel.bin

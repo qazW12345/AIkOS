@@ -43,10 +43,48 @@ static int str_eq(const char *a, const char *b)
     return *a == *b;
 }
 
+static int is_hex_digit(char c)
+{
+    return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+}
+
+static int hex_val(char c)
+{
+    if (c >= '0' && c <= '9')
+        return c - '0';
+    if (c >= 'a' && c <= 'f')
+        return c - 'a' + 10;
+    return c - 'A' + 10;
+}
+
+static int parse_hex(const char *s, uint64_t *out)
+{
+    uint64_t val = 0;
+    int any = 0;
+
+    if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X'))
+        s += 2;
+
+    if (!is_hex_digit(*s))
+        return 0;
+
+    while (is_hex_digit(*s)) {
+        val = (val << 4) | (uint64_t)hex_val(*s);
+        s++;
+        any = 1;
+    }
+
+    if (*s != '\0')
+        return 0;
+
+    *out = val;
+    return any;
+}
+
 static void repl_exec(char *cmd)
 {
     if (str_eq(cmd, "help")) {
-        kprintf("commands: help, echo <text>, ticks, version, panic, time, cpuid, vga, run, runfault\r\n");
+        kprintf("commands: help, echo <text>, ticks, version, panic, time, cpuid, vga, run, runfault, hexdump <addr> <len>\r\n");
     } else if (cmd[0] == 'e' && cmd[1] == 'c' && cmd[2] == 'h' && cmd[3] == 'o' &&
                cmd[4] == ' ' && cmd[5] != '\0') {
         kprintf("%s\r\n", cmd + 5);
@@ -92,6 +130,40 @@ static void repl_exec(char *cmd)
         kprintf("entering ring 3 (faulting program)...\r\n");
         proc_run_fault();
         kprintf("back in kernel\r\n");
+    } else if (cmd[0] == 'h' && cmd[1] == 'e' && cmd[2] == 'x' && cmd[3] == 'd' &&
+               cmd[4] == 'u' && cmd[5] == 'm' && cmd[6] == 'p' && cmd[7] == ' ') {
+        const char *args = cmd + 8;
+        uint64_t addr, len;
+        char *arg2;
+
+        // skip leading spaces
+        while (*args == ' ')
+            args++;
+
+        if (*args == '\0') {
+            kprintf("hexdump: usage: hexdump <addr> <len>\r\n");
+        } else {
+            // find second argument
+            arg2 = (char *)args;
+            while (*arg2 && *arg2 != ' ')
+                arg2++;
+            if (*arg2 == '\0') {
+                kprintf("hexdump: usage: hexdump <addr> <len>\r\n");
+            } else {
+                *arg2 = '\0';
+                arg2++;
+                while (*arg2 == ' ')
+                    arg2++;
+
+                if (!parse_hex(args, &addr)) {
+                    kprintf("hexdump: bad address\r\n");
+                } else if (!parse_hex(arg2, &len)) {
+                    kprintf("hexdump: bad length\r\n");
+                } else {
+                    hexdump(addr, len);
+                }
+            }
+        }
     } else {
         kprintf("unknown command (try help)\r\n");
     }

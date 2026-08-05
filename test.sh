@@ -148,6 +148,22 @@ if grep -q "GENERAL PROTECTION" build/fault.out; then ok "t8 fault named"; else 
 if grep -q "user program terminated" build/fault.out; then ok "t8 task killed"; else bad "t8 task killed"; fi
 if grep -q "back in kernel" build/fault.out; then ok "t8 kernel survives"; else bad "t8 kernel survives"; fi
 
+echo "[t9] hexdump REPL command"
+rm -f build/hexdump.out
+# input chunked <=15 bytes with gaps: QEMU's stdio chardev bursts overflow
+# the 16550 RX FIFO (war story #6) — 'hexdump 200000 10' is 18 bytes raw
+( sleep 2; printf 'hexdump 20000'; sleep 0.3; printf '0 10\n'; sleep 1
+  printf 'hexdump z';     sleep 0.3; printf 'zz 10\n'; sleep 2 ) | \
+    "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
+    -no-reboot -m 32M > build/hexdump.out 2>/dev/null &
+QPID=$!
+sleep 12
+kill "$QPID" 2>/dev/null || true
+wait "$QPID" 2>/dev/null || true
+if grep -q "55 48 89 e5" build/hexdump.out; then ok "t9 hexdump shows user prog bytes"; else bad "t9 hexdump shows user prog bytes"; fi
+if grep -q "200000" build/hexdump.out; then ok "t9 hexdump shows address"; else bad "t9 hexdump shows address"; fi
+if grep -q "bad address" build/hexdump.out; then ok "t9 hexdump bad address"; else bad "t9 hexdump bad address"; fi
+
 echo
 echo "RESULT: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
