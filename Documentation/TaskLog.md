@@ -7,6 +7,24 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-05 — CI upgraded: paths-filter + super-linter (green after 9 iterations)
+
+**Done:**
+- **paths-filter** (`dorny/paths-filter@v4.0.3`, SHA-pinned): the QEMU suite now runs only when code changes (`src/**`, `user/**`, test.sh, build.sh, `.github/**`) — docs-only pushes skip it (ADR-011 intent preserved).
+- **super-linter** (`super-linter/super-linter@v8.7.0`, SHA-pinned): shellcheck (build.sh/test.sh — SC2086 documented as intentional), markdownlint with the house config `.github/linters/.markdown-lint.yml` (MD013/022/026/029/031/032/034/036/040/060 off — deliberate dense-markdown style), yamllint, gitleaks, checkov (least-privilege permissions), zizmor (SHA-pinned actions, persist-credentials off, job-scoped statuses:write), codespell (`ist` = IDT IST field, `.codespellrc`).
+- Disabled by policy: clang-format/cpplint (kernel style), jscpd (intentional QEMU-block similarity), prettier/biome/JSON/markdown-prettier/yaml-prettier + shfmt (formatter fights), textlint, python linters (one throwaway tools/ppm2png.py — revisit when real python tooling lands).
+- All actions SHA-pinned (`owner/repo@sha` form) — supply-chain hardening. **Gotcha learned:** bare SHA is invalid workflow syntax; codespell config needs `[codespell]` section (not `[default]`); super-linter discovers configs in `.github/linters/` (markdownlint) but codespell reads the root `.codespellrc`.
+- **CI green: test job (full 26/26 suite) + lint job (0 findings)** — 9 pushes of iteration; this entry doubles as the docs-only-filter test.
+
+**Next:**
+- Phase 3 (Memory & Files) docs — CI now fast (docs-only skips QEMU) and self-linting.
+
+**Build state:** unchanged (v0.4.0 + hexdump + command table); CI: paths-filter + super-linter.
+
+**Open questions:** none blocking.
+
+---
+
 ## 2026-08-05 — REPL command table (Nemotron task #2 — lessons validated)
 
 **Done:**
