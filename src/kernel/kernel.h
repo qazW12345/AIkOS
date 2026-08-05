@@ -18,6 +18,9 @@ static inline unsigned char inb(unsigned short port)
     return ret;
 }
 
+/* printf.c */
+void kprintf(const char *fmt, ...);
+
 /* serial.c */
 void serial_init(void);
 void serial_putc(char c);
@@ -47,7 +50,14 @@ uint64_t pit_get_ticks(void);
 /* keyboard.c */
 void keyboard_irq(void);
 
+/* rtc.c */
+void rtc_read(int *sec, int *min, int *hour, int *day, int *month, int *year);
+
+/* cpuid.c */
+void cpuid_dump(void);
+
 /* repl.c */
 void repl_run(void);
+void repl_input_putc(char c);
 
 #endif

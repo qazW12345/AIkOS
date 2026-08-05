@@ -66,30 +66,11 @@ void idt_init(void)
 
 static void dump_frame(struct isr_frame *f)
 {
-    serial_write_string("rax="); serial_write_hex(f->rax, 16);
-    serial_write_string(" rbx="); serial_write_hex(f->rbx, 16);
-    serial_write_string(" rcx="); serial_write_hex(f->rcx, 16);
-    serial_write_string(" rdx="); serial_write_hex(f->rdx, 16);
-    serial_write_string("\r\n");
-    serial_write_string("rsi="); serial_write_hex(f->rsi, 16);
-    serial_write_string(" rdi="); serial_write_hex(f->rdi, 16);
-    serial_write_string(" rbp="); serial_write_hex(f->rbp, 16);
-    serial_write_string(" rsp="); serial_write_hex(f->rsp, 16);
-    serial_write_string("\r\n");
-    serial_write_string("r8 ="); serial_write_hex(f->r8, 16);
-    serial_write_string(" r9 ="); serial_write_hex(f->r9, 16);
-    serial_write_string(" r10="); serial_write_hex(f->r10, 16);
-    serial_write_string(" r11="); serial_write_hex(f->r11, 16);
-    serial_write_string(" r12="); serial_write_hex(f->r12, 16);
-    serial_write_string(" r13="); serial_write_hex(f->r13, 16);
-    serial_write_string(" r14="); serial_write_hex(f->r14, 16);
-    serial_write_string(" r15="); serial_write_hex(f->r15, 16);
-    serial_write_string("\r\n");
-    serial_write_string("rip="); serial_write_hex(f->rip, 16);
-    serial_write_string(" cs="); serial_write_hex(f->cs, 16);
-    serial_write_string(" rflags="); serial_write_hex(f->rflags, 16);
-    serial_write_string(" ss="); serial_write_hex(f->ss, 16);
-    serial_write_string("\r\n");
+    kprintf("rax=%lx rbx=%lx rcx=%lx rdx=%lx\r\n", f->rax, f->rbx, f->rcx, f->rdx);
+    kprintf("rsi=%lx rdi=%lx rbp=%lx rsp=%lx\r\n", f->rsi, f->rdi, f->rbp, f->rsp);
+    kprintf("r8 =%lx r9 =%lx r10=%lx r11=%lx\r\n", f->r8, f->r9, f->r10, f->r11);
+    kprintf("r12=%lx r13=%lx r14=%lx r15=%lx\r\n", f->r12, f->r13, f->r14, f->r15);
+    kprintf("rip=%lx cs=%lx rflags=%lx ss=%lx\r\n", f->rip, f->cs, f->rflags, f->rsp);
 }
 
 static void panic_halt(void)
@@ -102,19 +83,14 @@ void isr_handler(struct isr_frame *f)
 {
     if (f->vector < 32) {
         // CPU exception -> panic-and-halt with evidence (ADR-009)
-        serial_write_string("\r\nEXCEPTION ");
-        serial_write_dec(f->vector);
-        serial_write_string(" (");
-        serial_write_string(exception_names[f->vector]);
-        serial_write_string(") error=");
-        serial_write_hex(f->error_code, 8);
+        kprintf("\r\nEXCEPTION %d (%s) error=%lx", (int)f->vector,
+                exception_names[f->vector], f->error_code);
         if (f->vector == 14) {
             uint64_t cr2;
             __asm__ volatile("mov %%cr2, %0" : "=r"(cr2));
-            serial_write_string(" cr2=");
-            serial_write_hex(cr2, 16);
+            kprintf(" cr2=%lx", cr2);
         }
-        serial_write_string("\r\n");
+        kprintf("\r\n");
         dump_frame(f);
         panic_halt();
     }
@@ -130,9 +106,7 @@ void isr_handler(struct isr_frame *f)
         pic_eoi(irq);
         return;
     }
-    serial_write_string("\r\nUNHANDLED INTERRUPT ");
-    serial_write_dec(f->vector);
-    serial_write_string("\r\n");
+    kprintf("\r\nUNHANDLED INTERRUPT %d\r\n", (int)f->vector);
     dump_frame(f);
     panic_halt();
 }

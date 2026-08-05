@@ -1,16 +1,11 @@
 #!/usr/bin/env bash
 # AIkOS build script (ADR-005) — nasm -> clang -> ld.lld -> objcopy -> disk image.
-# Paths are absolute: the winget-installed tools are NOT on existing shells' PATH.
+# Toolchain paths come from env.sh (platform-aware, ADR-011).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT"
-
-NASM="/c/Users/marce/AppData/Local/bin/NASM/nasm.exe"
-CLANG="/c/Program Files/LLVM/bin/clang.exe"
-LLD="/c/Program Files/LLVM/bin/ld.lld.exe"
-OBJCOPY="/c/Program Files/LLVM/bin/llvm-objcopy.exe"
-PYTHON="python"   # never python3 on this machine (see Guides)
+. ./env.sh
 
 KERNEL_SECTORS=64   # must match boot.asm default; injected at assembly time
 
@@ -35,11 +30,15 @@ echo "[3/6] kernel C"
 "$CLANG" --target=x86_64-elf $CFLAGS -c -o build/pit.o      src/kernel/pit.c
 "$CLANG" --target=x86_64-elf $CFLAGS -c -o build/keyboard.o src/kernel/keyboard.c
 "$CLANG" --target=x86_64-elf $CFLAGS -c -o build/repl.o     src/kernel/repl.c
+"$CLANG" --target=x86_64-elf $CFLAGS -c -o build/printf.o   src/kernel/printf.c
+"$CLANG" --target=x86_64-elf $CFLAGS -c -o build/rtc.o      src/kernel/rtc.c
+"$CLANG" --target=x86_64-elf $CFLAGS -c -o build/cpuid.o    src/kernel/cpuid.c
 
 echo "[4/6] link (entry.o first so the binary starts with _start)"
 "$LLD" -T linker.ld -o build/kernel.elf \
     build/entry.o build/kmain.o build/serial.o build/vga.o build/interrupt.o \
-    build/idt.o build/pic.o build/pit.o build/keyboard.o build/repl.o
+    build/idt.o build/pic.o build/pit.o build/keyboard.o build/repl.o \
+    build/printf.o build/rtc.o build/cpuid.o
 
 echo "[5/6] flat kernel binary"
 "$OBJCOPY" -O binary build/kernel.elf build/kernel.bin
