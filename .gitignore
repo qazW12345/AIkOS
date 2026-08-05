@@ -10,3 +10,6 @@ build/
 # Editor / OS junk
 Thumbs.db
 .DS_Store
+
+# CI workflow: locally ready, push-blocked until PAT gains workflow scope (see Guides/How-to-version-control.md)
+.github/workflows/

@@ -2,7 +2,7 @@
 
 The project plan. Every phase has an **exit criterion** — a phase is done when its test demonstrably passes, nothing less.
 
-**Current phase: Phase 2 — not started** (Phase 1 shipped as v0.2.0 on 2026-08-05)
+**Current phase: Phase 2 — not started** (Phase 1.5 shipped as v0.3.0 on 2026-08-05)
 
 ## Phases
 
@@ -10,7 +10,7 @@ The project plan. Every phase has an **exit criterion** — a phase is done when
 |---|---|---|---|---|
 | 0 | Proof of Life | Boot in QEMU; banner on VGA + serial console | `test.sh` green (headless QEMU boot, serial log contains `AIkOS v0.1.0`); VGA banner verified via screendump; tagged release v0.1.0 | ✅ **DONE — v0.1.0 (2026-08-05)** |
 | 1 | The Machine Wakes | Interrupts, timer ticks, PS/2 keyboard, kernel-mode REPL | test.sh v2 green: REPL responds to help/echo/ticks over `-serial stdio`; ticks increments; keyboard scancodes via monitor `sendkey`; `panic` produces exception dump; Phase 0 regression green; tagged release v0.2.0 | ✅ **DONE — v0.2.0 (2026-08-05)** |
-| 1.5 | The Senses (extension) | kprintf, RTC+time, CPUID, VGA scroll, keyboard REPL, CI | test.sh v3 green: time/cpuid commands respond; keyboard-typed command works (sendkey h/e/l/p/ret); all Phase 1 tests stay green; GitHub Actions run green; tagged release v0.3.0 | ⬜ design done (2026-08-05) |
+| 1.5 | The Senses (extension) | kprintf, RTC+time, CPUID, VGA scroll, keyboard REPL, CI | test.sh v3 green: time/cpuid commands respond; keyboard-typed command works (sendkey h/e/l/p/ret); all Phase 1 tests stay green; GitHub Actions run green; tagged release v0.3.0 | ✅ **DONE — v0.3.0 (2026-08-05)** — CI activation pending token with `workflow` scope |
 | 2 | Two Worlds | Paging, user mode, syscalls | A ring-3 process runs and syscalls out | ⬜ |
 | 3 | Memory & Files | Allocators, filesystem, ELF loader, first userland apps | Boots from disk image; runs /bin apps | ⬜ |
 | 4 | A Face | Framebuffer GUI, windows, compositor | Windows draw, drag, close — verified via QEMU screendump | ⬜ |

@@ -54,3 +54,7 @@ git branch -D experiment-something     # throw it away (or merge if it worked)
 - The local repo is the working copy; **GitHub (private, qazW12345/AIkOS) is the off-machine backup** — push after every meaningful change: `git push`.
 - Credentials are stored in Git Credential Manager — pushes are silent.
 - Commits are authored as `AIko <aiko@aikos.local>` (see TaskLog; changeable with `git config user.name` if ever wanted).
+
+## Known limitation: token scopes
+
+The stored PAT has `repo` but **not** `workflow` or `read:org` — pushing files under `.github/workflows/` is rejected ("refusing to allow a Personal Access Token to create or update workflow"). To activate CI (ADR-011): create a classic PAT with `workflow` (and `read:org`) added, or a fine-grained token with Workflows permission, then push `.github/workflows/build.yml` (currently untracked, ready locally).

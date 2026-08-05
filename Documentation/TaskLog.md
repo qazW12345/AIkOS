@@ -7,6 +7,26 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-05 — 🎉 PHASE 1.5 COMPLETE — v0.3.0: The Senses!
+
+**Done:**
+- **test.sh v3: 14/14 green** — t1 regression (v0.3.0 banner), t2 REPL, t3 keyboard scancodes + **keyboard-typed command** (`sendkey h/e/l/p/ret` → `commands: help`), t4 panic dump, t5 RTC `time`, t6 `cpuid`.
+- Implemented per ADR-010: `kprintf` (printf.c, %c %s %d %u %x %ld %lu %lx %p %% + zero-padded width; refactored idt.c/repl.c/keyboard.c), RTC (rtc.c, UIP guard, century sanity), CPUID (cpuid.c, vendor/features), VGA scrolling (vga.c), keyboard REPL (set-1 keymap + shift state + SPSC input queue in repl.c).
+- **VGA scroll verified visually**: keyboard-typed `vga` → screendump shows "Line 6".."Line 29" (0-5 scrolled off).
+- Kernel: 8,768 → 11,632 bytes.
+- CI (ADR-011): workflow + `env.sh` written and locally validated; **push blocked** — the GitHub PAT lacks `workflow` scope (same token family as the earlier `read:org` issue). Workflow file is untracked locally, ready to push once the token is upgraded. Pending Marcel.
+- Tagged **v0.3.0**, release with disk.img (note about pending CI in the body).
+
+**Next:**
+- CI activation: create a PAT with `workflow` scope (or fine-grained with Workflows permission) → paste → push workflow → confirm first Actions run.
+- Phase 2 (Two Worlds) design doc.
+
+**Build state:** v0.3.0 — REPL with time/cpuid/vga, keyboard input, printf, scrolling console.
+
+**Open questions:** CI token scope (Marcel decision).
+
+---
+
 ## 2026-08-05 — Phase 1.5 designed (The Senses)
 
 **Done:**
