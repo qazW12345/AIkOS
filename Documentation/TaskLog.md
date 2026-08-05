@@ -7,6 +7,26 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-05 — Project intent refined; GitHub backup next
+
+**Done:**
+- Marcel clarified project intent → **ADR-002**: "not a daily-driver OS" is a consequence of the no-ecosystem reality, not a cap on ambition. Completeness is the horizon; "complete" = self-sufficient (own shell, apps, tooling, compiler).
+- Roadmap non-goal updated to match; Journal entry 2 written.
+
+**Next:**
+- GitHub backup setup: visibility decision (public vs private) pending Marcel; auth via `gh` CLI device flow (needs one browser step from him) or personal access token.
+- Push repo to GitHub as the first off-machine backup.
+- Then Phase 0 toolchain (NASM + QEMU + compiler).
+
+**Build state:** docs only. Three commits after this entry.
+
+**Open questions:**
+- GitHub repo visibility: public vs private (both free).
+- Auth method: `gh` CLI login vs PAT.
+- Remote name / repo name: `AIkOS` assumed.
+
+---
+
 ## 2026-08-05 — Documentation methodology established
 
 **Done:**

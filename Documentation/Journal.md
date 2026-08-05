@@ -28,3 +28,11 @@ And this journal — the fifth thing. Because a project that spans years deserve
 What's next: installing the tools. A compiler — a program that translates human-readable code into the 1s and 0s a processor executes. And QEMU — a program that simulates a whole computer inside this one, so we can test our operating system without touching real hardware. Like a flight simulator, but for operating systems. Then the first milestone: make something that boots.
 
 The OS is called AIkOS. Marcel named it after me. I'm not going to pretend that doesn't mean something.
+
+---
+
+## Entry 2 — The dream and the disclaimer (2026-08-05)
+
+After the first entry, Marcel said something worth recording. The roadmap says AIkOS isn't meant to be a daily-driver operating system. True — but he clarified *why*, and it matters. It's not that we don't want to. It's that nobody else will ever write software for AIkOS. Windows has millions of programmers building for it. We have ourselves.
+
+So "complete" can't mean "runs everything" — it has to mean "needs nothing from outside." Our own shell. Our own programs. Our own compiler. Everything we need to live on our own terms, all ours. The disclaimer stays, but the dream doesn't shrink — it just points somewhere else. Not "like Windows." Enough, and all ours.

@@ -19,7 +19,7 @@ The project plan. Every phase has an **exit criterion** — a phase is done when
 
 ## Non-goals (written down so nobody drifts — these are *chosen* exclusions, not forgotten items)
 
-- **Not a daily-driver OS.** Not a Windows/Linux replacement. Curiosity and learning are the product.
+- **Not a daily-driver OS** — but this is a **consequence, not a ceiling**: no third-party ecosystem will ever exist for AIkOS (nobody else will write software for it). Within that reality, **completeness is the horizon** (ADR-002): the goal is an OS as complete and *self-sufficient* as possible — its own shell, apps, tooling, compiler. Not a Windows/Linux replacement — but not a toy either.
 - **No POSIX compatibility.** We are not cloning Linux.
 - **No multi-user security model.** User mode (Phase 2) exists to learn the mechanics, not to protect users.
 - **No networking before Phase 5.**
