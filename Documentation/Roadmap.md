@@ -12,7 +12,7 @@ The project plan. Every phase has an **exit criterion** — a phase is done when
 | 1 | The Machine Wakes | Interrupts, timer ticks, PS/2 keyboard, kernel-mode REPL | test.sh v2 green: REPL responds to help/echo/ticks over `-serial stdio`; ticks increments; keyboard scancodes via monitor `sendkey`; `panic` produces exception dump; Phase 0 regression green; tagged release v0.2.0 | ✅ **DONE — v0.2.0 (2026-08-05)** |
 | 1.5 | The Senses (extension) | kprintf, RTC+time, CPUID, VGA scroll, keyboard REPL, CI | test.sh v3 green: time/cpuid commands respond; keyboard-typed command works (sendkey h/e/l/p/ret); all Phase 1 tests stay green; GitHub Actions run green; tagged release v0.3.0 | ✅ **DONE — v0.3.0 (2026-08-05)** — CI green on GitHub Actions |
 | 2 | Two Worlds | Paging, user mode, syscalls | test.sh v4 green: ring-3 program runs and syscalls out (`SYSCALL 1 (write)` + user text over serial); user fault kills the task without a kernel panic (REPL responsive after); Phase 1.5 regression green; tagged release v0.4.0 | ✅ **DONE — v0.4.0 (2026-08-05)** — 22/22 green; two ring-3 programs |
-| 3 | Memory & Files | Allocators, filesystem, ELF loader, first userland apps | Boots from disk image; runs /bin apps | ⬜ |
+| 3 | Memory & Files | Allocators, filesystem, ELF loader, first userland apps | Boots from disk image; runs /bin apps | ⬜ design done (2026-08-05 — ADR-015/016/017) |
 | 4 | A Face | Framebuffer GUI, windows, compositor | Windows draw, drag, close — verified via QEMU screendump | ⬜ |
 | 5 | The Wire | NIC driver, ARP/IP/TCP, socket API | A fetch-style app works over QEMU virtual network | ⬜ |
 | 6 | Own Tongue | Compiler for our own language | Compile + run a program on AIkOS itself | ⬜ |

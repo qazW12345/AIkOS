@@ -7,6 +7,22 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-05 — Phase 3 designed (Memory & Files)
+
+**Done:**
+- **Design doc** `Documentation/Design/Phase-3-Memory-and-Files.md`: buddy heap (ADR-017), AIkFS v1 read-only custom filesystem, RAM-backed (initramfs) with host-side `tools/mkfs.py` (ADR-015), static ELF64 loader (ADR-016), /bin apps (`hello.elf`, `ver.elf`), REPL additions (`ls`, `cat`, `fsinfo`, `runelf`, `heap`, `heaptest`), memory map v3 (AIkFS ramdisk @0x400000), test plan v7 (**31 checks**: +fsinfo, +ls, +runelf, +heap, +heaptest), implementation order.
+- **New ADRs:** ADR-015 (AIkFS: custom format, initramfs backing, read-only v1), ADR-016 (ELF static ET_EXEC loading, 0x200000–0x400000 region, reuse proc machinery), ADR-017 (binary buddy over pmm, kmalloc/kfree, heap/heaptest observability — fulfils the ADR-012 deferred candidate).
+- Deferred to Phase 3.x (recorded in the doc's Non-goals): higher-half kernel, FS write support, ATA/PIO driver, file syscalls, slab allocator.
+
+**Next:**
+- Phase 3 implementation (order: buddy → AIkFS → ELF → apps → test.sh v7) — chunks are Nemotron-delegatable (contracts in place per ADR-014).
+
+**Build state:** v0.4.0 + hexdump + command table; CI paths-filter + super-linter green.
+
+**Open questions:** none blocking (design decisions listed in the summary for approval).
+
+---
+
 ## 2026-08-05 — CI upgraded: paths-filter + super-linter (green after 9 iterations)
 
 **Done:**
