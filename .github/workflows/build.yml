@@ -51,14 +51,14 @@ jobs:
       # yamllint (workflows). Disabled on purpose: clang-format/cpplint would
       # churn the hand-tuned freestanding kernel style; jscpd flags test.sh's
       # intentionally-similar QEMU blocks; prettier/biome/JSON formatter taste
-      # fights aren't worth it on a 5-line config file.
+      # fights aren't worth it on config files. markdownlint uses the house
+      # config at .github/linters/.markdown-lint.yml (default discovery).
       - name: Super-Linter
         uses: super-linter/super-linter@v8.7.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BRANCH: main
           VALIDATE_ALL_CODE_BASES: false
-          MARKDOWN_CONFIG_FILE: .markdownlint.json
           VALIDATE_CLANG_FORMAT: false
           VALIDATE_CPP: false
           VALIDATE_JSCPD: false

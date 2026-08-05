@@ -1,0 +1,9 @@
+---
+# AIkOS house style for markdownlint (ADR-014 spirit: docs are code).
+# All disabled rules are deliberate house conventions, not oversights:
+MD013: false   # long prose lines / TaskLog bullets are the house style
+MD026: false   # celebratory milestone headings ("v0.2.0: The Machine Wakes!")
+MD034: false   # bare GitHub URLs in ADRs and guides
+MD036: false   # bold label paragraphs (**Rule:**, **Done:**, ...)
+MD040: false   # ADR structure examples use bare fences
+MD060: false   # compact table separators (|---|---|) are used repo-wide
