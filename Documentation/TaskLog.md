@@ -7,6 +7,22 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-05 — Phase 2 designed (Two Worlds)
+
+**Done:**
+- Decisions accepted (Marcel: "all recommendations"): **ADR-012** (memory: E820 discovery, bitmap allocator, identity-mapped kernel in all address spaces; buddy + higher-half recorded deferrals), **ADR-013** (privilege separation: `int 0x80` DPL-3 gate, minimal TSS, user programs as disk blobs, **user faults kill the task — supersedes ADR-009's ring-3 clause**).
+- **Design doc**: `Design/Phase-2-Two-Worlds.md` — memory map (E820 at 0x5000, bitmap at 0xC000, user blobs at 0x200000/0x220000), per-subsystem design (mm.c, proc.c, tss.c, syscall.c, REPL run/runfault, user/ programs), test plan v4 (t7 syscall round-trip, t8 user-fault survival), risks.
+- **Roadmap**: Phase 2 exit criterion sharpened → test.sh v4 + tag v0.4.0; status "design done".
+
+**Next:**
+- Implement Phase 2: mm.c → tss/gdt → syscalls → proc.c → user programs → REPL commands → test.sh v4.
+
+**Build state:** v0.3.0 shipped; Phase 2 designed.
+
+**Open questions:** none blocking.
+
+---
+
 ## 2026-08-05 — ✅ CI LIVE — first GitHub Actions run green!
 
 **Done:**
