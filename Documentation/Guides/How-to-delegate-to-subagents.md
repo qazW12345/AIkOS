@@ -81,4 +81,4 @@ Output: pass/fail per expected line.
 
 ## 5. Validation record
 
-- **2026-08-05:** first-use gate — Tier-1 log-analysis benchmark task dispatched (read `build/user.out`, report milestone chain + key strings). Result appended below when it lands.
+- **2026-08-05 — first-use gate PASSED.** Tier-1 log-analysis benchmark: read `build/user.out`, report milestone chain + key strings. Result: `SBMEUFALCP123456789KAIkOS v0.4.0`; `hello from ring 3` (line 6); `back in kernel` (line 9) — **verified accurate** against the file (grep line numbers match). 2 API calls, ~23 s, correct tool use, correct format, no fabrication. Baseline established for Tier-1 reliability.
