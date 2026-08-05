@@ -7,6 +7,23 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-05 — Phase 1 designed (The Machine Wakes)
+
+**Done:**
+- Decisions accepted (all recommendations): **ADR-007** (interrupt architecture: PIC 8259A + PIT 100 Hz; APIC/HPET deferred), **ADR-008** (input: scancode set 1, serial RX polling, serial-only REPL + `panic` command; keymap & serial IRQ deferred), **ADR-009** (exception policy: panic-and-halt with register dump; revisit at Phase 2).
+- **Design doc**: `Design/Phase-1-The-Machine-Wakes.md` — IDT/stub architecture, PIC/PIT/keyboard/serial details, `-mgeneral-regs-only`, memory layout, test plan, pitfalls.
+- **Roadmap**: Phase 1 exit criterion sharpened into a scripted test (REPL + ticks + keyboard via sendkey + panic dump + Phase 0 regression → v0.2.0).
+
+**Next:**
+- Implement: `interrupt.asm`, `idt.c`, `pic.c`, `pit.c`, `keyboard.c`, `repl.c`; test.sh v2.
+- On green: tag v0.2.0 + release (ADR-004).
+
+**Build state:** v0.1.0 shipped; Phase 1 designed, not implemented.
+
+**Open questions:** none blocking — implementation follows the design doc.
+
+---
+
 ## 2026-08-05 — 🎉 PHASE 0 COMPLETE — v0.1.0 boots!
 
 **Done:**
