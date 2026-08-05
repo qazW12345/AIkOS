@@ -1,24 +1,14 @@
 // Minimal 16550 UART driver for COM1 (0x3F8) — the kernel's debug lifeline.
-// Phase 0 scope: init + output only.
+// Phase 1: polled RX (REPL input) + hex/dec printers added.
 //
 // NOTE: the 16550 is PORT-mapped I/O — it requires the `out`/`in`
 // instructions. A plain memory store to 0x3F8 (*(volatile ...) = c) silently
 // writes to RAM and produces nothing on the wire. War story #4,
 // see Guides/How-to-debug.md.
 
+#include "kernel.h"
+
 #define COM1 0x3F8
-
-static inline void outb(unsigned short port, unsigned char val)
-{
-    __asm__ volatile("outb %0, %w1" : : "a"(val), "d"(port));
-}
-
-static inline unsigned char inb(unsigned short port)
-{
-    unsigned char ret;
-    __asm__ volatile("inb %w1, %0" : "=a"(ret) : "d"(port));
-    return ret;
-}
 
 void serial_init(void)
 {
@@ -42,4 +32,39 @@ void serial_write_string(const char *str)
 {
     while (*str)
         serial_putc(*str++);
+}
+
+int serial_rx_ready(void)
+{
+    return (inb(COM1 + 5) & 1) != 0;
+}
+
+char serial_read_char(void)
+{
+    return (char)inb(COM1);
+}
+
+void serial_write_hex(uint64_t v, int digits)
+{
+    int i;
+    for (i = digits - 1; i >= 0; i--) {
+        int n = (int)((v >> (4 * i)) & 0xF);
+        serial_putc((char)(n < 10 ? '0' + n : 'a' + n - 10));
+    }
+}
+
+void serial_write_dec(uint64_t v)
+{
+    char buf[21];
+    int i = 0;
+    if (v == 0) {
+        serial_putc('0');
+        return;
+    }
+    while (v > 0) {
+        buf[i++] = (char)('0' + (v % 10));
+        v /= 10;
+    }
+    while (i > 0)
+        serial_putc(buf[--i]);
 }

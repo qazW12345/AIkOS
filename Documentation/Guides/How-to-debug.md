@@ -42,6 +42,9 @@ The identity-map PD fill started with `mov eax, 0x200000 | 0x83`. In a 2MiB page
 ### #5 — SysV ABI: the first char argument arrives in DIL, not AL
 An asm routine exported to C as `kputc(char c)` must read `dil`, not the pushed `al`. Wrong convention = it prints whatever RAX happened to hold (we got three 'K's where 'a','b','c' belonged — which is how we found it).
 
+### #6 — QEMU stdio chardev bursts >16 bytes into the UART RX FIFO (test harness)
+Piped input to `-serial stdio` is pushed into the 16550's RX FIFO synchronously — a burst larger than the 16-byte FIFO silently drops the overflow, even though the kernel polls and drains constantly. Real terminals never burst (humans type slowly), so the kernel is fine — **automated tests must chunk input ≤ 15 bytes per write with small gaps.** Related: with `-serial file:...`, QEMU's stdin goes *nowhere* — guest input must come via `-serial stdio`; and our hex dumps are lowercase (`KB: 0x1e`), so grep lowercase.
+
 ## Anti-patterns learned
 
 - Debug milestones in the boot chain (one char per stage, serial) beat monitor forensics for boot failures — add them FIRST, not after hours of tracing.

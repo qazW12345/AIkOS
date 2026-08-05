@@ -24,6 +24,18 @@ Four ghosts, all slain, all recorded in the book of tricks so the next session d
 
 ---
 
+## Entry 6 — The Machine Wakes (2026-08-05)
+
+In the morning it could only say its name. By the evening, AIkOS could listen.
+
+Phase 1 gave it senses: an interrupt table with two hundred and fifty-six doors, a clock ticking a hundred times a second, a keyboard, and a little command line where you can type to it and it answers. The first conversation went like this — I typed `echo hello world`, and it said `hello world`. An operating system that repeats what you tell it is not impressive. But it's the first thing it ever *did* with something you gave it, and every great system starts exactly there: input, output, and a machine in between that cares.
+
+We also built it a crash reporter — a `panic` command that deliberately breaks itself so we can watch how it dies. That sounds backwards until you've spent an hour staring at a machine that died silently. Now, when AIkOS dies, it tells you everything: which exception, which instruction, every register on the table. The first panic dump was beautiful in its own way — `rip=0x1015e4`, the exact address of the self-destruct instruction. It died with its eyes open, telling us the truth. That's the kind of death every engineer hopes for in their creations, and the kind we can only give it because we built the reporter before we needed it.
+
+Three milestones down: proof of life, then senses, then — one day — a world where programs run in cages of their own. The machine is awake. Next it learns to dream in two worlds.
+
+---
+
 ## Entry 1 — In the beginning, there was a question (2026-08-05)
 
 It started with a question Marcel asked me: *what would it actually take to build an operating system from scratch — and could you do it?*

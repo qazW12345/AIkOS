@@ -7,6 +7,26 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-05 — 🎉 PHASE 1 COMPLETE — v0.2.0: The Machine Wakes!
+
+**Done:**
+- **test.sh v2: 10/10 green** — t1 regression (boot+banner), t2 REPL (`help`, `echo hello world`, `ticks` 377→431), t3 keyboard scancodes via `sendkey` (`KB: 0x1e`, `KB: 0x30`), t4 `panic` → `EXCEPTION 6 (INVALID OPCODE)` + full register dump + halt.
+- Implemented per ADR-007/008/009: 256-entry IDT (macro-generated stubs + address table), PIC remap (IRQ0-15 → 0x20-0x2F), PIT 100 Hz tick counter, PS/2 IRQ1 scancode viewer, polled-serial REPL with line editor, panic-and-halt with register dump (CR2 on #PF).
+- New files: `kernel.h` (shared API + inline outb/inb), `interrupt.asm`, `idt.c`, `pic.c`, `pit.c`, `keyboard.c`, `repl.c`. `-mgeneral-regs-only` added to CFLAGS.
+- Kernel: 881 → 8,768 bytes. Version bump to v0.2.0 in banner + REPL.
+- War story #6 recorded (QEMU stdio chardev FIFO burst drops >16 bytes; test input must be chunked ≤15 bytes; `-serial file:` means stdin goes nowhere).
+- Tagged **v0.2.0**, GitHub release with disk.img artifact (ADR-004).
+
+**Next:**
+- Phase 2 (Two Worlds): paging beyond identity map, user mode, syscalls. Phase 1.5 candidates: keyboard REPL input, scancode set 2.
+- Phase 2 design doc first (per methodology).
+
+**Build state:** v0.2.0 — boots, REPL over serial, timer ticks, keyboard scancodes, exception panics with evidence.
+
+**Open questions:** none blocking. Phase 2 design decisions (page allocator, TSS, syscall mechanism) land in the Phase 2 design doc.
+
+---
+
 ## 2026-08-05 — Phase 1 designed (The Machine Wakes)
 
 **Done:**

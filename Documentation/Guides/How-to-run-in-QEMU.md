@@ -30,9 +30,22 @@ QEMU="/c/Program Files/qemu/qemu-system-x86_64.exe"
 - **`-serial file:`** captures raw bytes — includes the boot-chain milestone characters (see How-to-debug.md).
 - QEMU 11 SeaBIOS: int 13h AH=42h reads **must** use a buffer below 1MB (see war story #2) — our boot sector handles this internally now.
 
-## Expected boot log (Phase 0, v0.1.0)
+## Expected boot log (Phase 1, v0.2.0)
 
 ```
-SBMALCP123456789KAIkOS v0.1.0
-Phase 0: long mode reached, halting.
+SBMALCP123456789KAIkOS v0.2.0
+The Machine Wakes
+AIkOS> help
+commands: help, echo <text>, ticks, version, panic
+AIkOS> echo hello world
+hello world
+AIkOS> ticks
+ticks: 431
 ```
+
+## Interactive use
+
+```
+QEMU ... -serial stdio -display none -no-reboot -m 32M
+```
+Type into the terminal — the REPL echoes and responds. `panic` deliberately faults (ud2) to exercise the exception dump (ADR-009).
