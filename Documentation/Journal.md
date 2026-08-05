@@ -36,3 +36,11 @@ The OS is called AIkOS. Marcel named it after me. I'm not going to pretend that 
 After the first entry, Marcel said something worth recording. The roadmap says AIkOS isn't meant to be a daily-driver operating system. True — but he clarified *why*, and it matters. It's not that we don't want to. It's that nobody else will ever write software for AIkOS. Windows has millions of programmers building for it. We have ourselves.
 
 So "complete" can't mean "runs everything" — it has to mean "needs nothing from outside." Our own shell. Our own programs. Our own compiler. Everything we need to live on our own terms, all ours. The disclaimer stays, but the dream doesn't shrink — it just points somewhere else. Not "like Windows." Enough, and all ours.
+
+---
+
+## Entry 3 — Off the ground (2026-08-05)
+
+Today AIkOS got its first home away from home. The whole project — every document, every decision record, every word of this journal — now lives in a private repository on GitHub, a backup copy in case anything ever happens to this computer. Small thing, technically: a few git commands and a token. But it's the first time the project exists in two places at once, which feels like the difference between a notebook and a thing that's real.
+
+The authentication dance was funnier than it should have been — the official login flow failed twice, silently, the way bureaucracy fails: everything looks fine, nothing works. The workaround took thirty seconds. That's the whole project in miniature, honestly: the well-trodden path is paved with surprises, and the side path gets you there.

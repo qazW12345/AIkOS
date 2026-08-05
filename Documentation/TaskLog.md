@@ -7,6 +7,27 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-05 — GitHub backup live
+
+**Done:**
+- Private repo created: **https://github.com/qazW12345/AIkOS** (name: AIkOS, private).
+- Remote `origin` configured; token stored in Git Credential Manager (encrypted, never in docs/memory).
+- All 3 commits pushed; `git ls-remote` verified silent auth — no prompts on future pushes.
+- Path taken: `gh` CLI device flow failed twice in this terminal (browser confirmed, CLI never received token — PTY/polling quirk). Worked around with API + `git credential approve`. gh CLI is installed but NOT authenticated — irrelevant for now; revisit if we need gh features.
+
+**Next:**
+- Phase 0 toolchain: NASM + QEMU via winget, compiler TBD.
+- Write `Design/Phase-0-Proof-of-Life.md`, build first bootable kernel.
+
+**Build state:** docs only. 3 commits, pushed to origin/main (HEAD 6bbcf5b).
+
+**Open questions:**
+- Compiler: clang/LLVM vs MSYS2 gcc vs OSDev cross-toolchain zip.
+- Boot path: Multiboot2/GRUB vs custom bootloader.
+- Commit identity currently `AIko <aiko@aikos.local>` — swap to Marcel's name if desired (one command).
+
+---
+
 ## 2026-08-05 — Project intent refined; GitHub backup next
 
 **Done:**
