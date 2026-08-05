@@ -15,6 +15,8 @@ The source of truth for "where are we". The newest entry describes the current s
 - Disabled by policy: clang-format/cpplint (kernel style), jscpd (intentional QEMU-block similarity), prettier/biome/JSON/markdown-prettier/yaml-prettier + shfmt (formatter fights), textlint, python linters (one throwaway tools/ppm2png.py — revisit when real python tooling lands).
 - All actions SHA-pinned (`owner/repo@sha` form) — supply-chain hardening. **Gotcha learned:** bare SHA is invalid workflow syntax; codespell config needs `[codespell]` section (not `[default]`); super-linter discovers configs in `.github/linters/` (markdownlint) but codespell reads the root `.codespellrc`.
 - **CI green: test job (full 26/26 suite) + lint job (0 findings)** — 9 pushes of iteration; this entry doubles as the docs-only-filter test.
+- **actions/cache: NOT adopted** (2026-08-05): no package-manager deps to cache; the suite's QEMU wall-clock time is the cost, and caching can't shrink it. Revisit when Phase 3+ userland tooling brings dependency downloads (see ADR-011 Update).
+- **Revisit `sdras/awesome-actions` when AIkOS is significantly bigger** — curated action index; today's needs are fully covered (ADR-011 Future considerations).
 
 **Next:**
 - Phase 3 (Memory & Files) docs — CI now fast (docs-only skips QEMU) and self-linting.

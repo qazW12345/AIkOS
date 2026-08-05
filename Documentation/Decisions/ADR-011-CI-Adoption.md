@@ -16,13 +16,16 @@ Two phases are now green (v0.1.0, v0.2.0) and `test.sh` is the canonical suite (
 - **Platform-aware toolchain paths** via a shared `env.sh` sourced by `build.sh` and `test.sh` (MINGW/git-bash absolute paths vs Linux package names; `python` vs `python3`).
 - CI is informational for now (no required status checks, no release automation).
 
-## Consequences
+## Update (2026-08-05)
 
-**Positive:**
-- Every push builds AIkOS, boots it in QEMU, and runs the full gauntlet — regressions surface the moment they're pushed.
-- The local ad-hoc verification ritual can retire for normal changes.
-- Real-hardware boot tests (Phase 7) will one day extend this.
+CI grew without changing the core decision:
 
-**Negative / costs:**
-- Workflow + portability maintenance (small).
-- GitHub-hosted runners only (no caching of toolchain — ~1 min install per run, acceptable).
+- **paths-filter** (`dorny/paths-filter`, SHA-pinned): the QEMU suite runs only when code changes (`src/**`, `user/**`, `test.sh`, `build.sh`, `.github/**`). Docs-only pushes skip the ~3–4 min suite — the "every push" clause above is now "every push that touches code" (ADR-011 intent preserved; docs cannot break the kernel).
+- **super-linter** (SHA-pinned): shellcheck, markdownlint (house config `.github/linters/.markdown-lint.yml`), yamllint, gitleaks, checkov, zizmor, codespell. Formatter linters, textlint, and python linters are disabled by policy (one throwaway `tools/ppm2png.py`; revisit when real python tooling lands).
+- **Supply-chain hardening:** all actions pinned to full SHAs (`owner/repo@sha`), least-privilege workflow permissions, `persist-credentials: false`.
+- **actions/cache verdict:** NOT adopted — the workflow has no package-manager dependency tree to cache (freestanding C + nasm; toolchain via apt, ~1 min); the dominant CI cost is QEMU wall-clock test time, which caching cannot reduce. Revisit when Phase 3+ userland tooling introduces dependency downloads (npm/pip/cargo-style), or if CI time analysis ever shows container-image pulls dominating.
+
+## Future considerations
+
+- **Revisit `sdras/awesome-actions` when AIkOS becomes significantly bigger** (userland tooling, artifact/release automation, complex multi-job workflows) — it is a curated index of actions; today our CI needs are fully covered by the two actions above.
+- Real-hardware boot tests (Phase 7) will extend this workflow.
