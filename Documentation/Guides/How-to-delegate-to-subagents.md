@@ -81,4 +81,11 @@ Output: pass/fail per expected line.
 
 ## 5. Validation record
 
-- **2026-08-05 — first-use gate PASSED.** Tier-1 log-analysis benchmark: read `build/user.out`, report milestone chain + key strings. Result: `SBMEUFALCP123456789KAIkOS v0.4.0`; `hello from ring 3` (line 6); `back in kernel` (line 9) — **verified accurate** against the file (grep line numbers match). 2 API calls, ~23 s, correct tool use, correct format, no fabrication. Baseline established for Tier-1 reliability.
+- **2026-08-05 — Tier-1 gate PASSED.** Log-analysis benchmark (read `build/user.out`, report milestone chain + key strings): `SBMEUFALCP123456789KAIkOS v0.4.0`; `hello from ring 3` (line 6); `back in kernel` (line 9) — verified accurate by grep. 2 API calls, ~23 s, zero fabrication.
+- **2026-08-05 — Tier-2 real-world task PASSED (with review fixes).** Task: implement the `hexdump <addr> <len>` REPL command + tests (commit `d87a2b3`, test.sh v5 **25/25 green**, CI green). 50 API calls, ~15 min. Result quality: **structurally correct on first pass** — spec-compliant output format (verified row: `00200000  55 48 89 e5 bf 23 10 20  00 be 12 00 00 00 b8 01  |UH...#. ........|`), correct error strings, good judgment (checked printf.c for `%02x` support, chose a local hex helper instead), build.sh integration correct. **Two review findings, both fixed by the reviewer:** (a) `ADR-XXX` placeholder left in a header comment; (b) the test piped an 18-byte burst (`hexdump 200000 10\n`) — over the 16550 RX FIFO limit (war story #6) — the brief omitted repo-specific traps. **Lessons → §6.**
+
+## 6. Lessons for delegation briefs
+
+- Briefs must include **repo-specific traps**, not just general context: the FIFO-burst rule (war story #6), CRLF in kernel strings, lowercase hex, the `python`/`python3` quirk. A one-line "read How-to-debug.md war stories #1–9 first" is cheap insurance.
+- Placeholder tokens (`XXX`) are a common LLM artifact — grep for them in review.
+- Subagent self-reports remain self-reports: the final timing patch it reported never landed on disk. **Always verify repo state with `git status`/`git diff` and run the suite yourself** (house rule).

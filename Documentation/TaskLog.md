@@ -7,6 +7,22 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-05 — hexdump tool shipped (first Nemotron real-world task)
+
+**Done:**
+- New REPL command `hexdump <addr> <len>` (src/kernel/hexdump.c): memory dump tool — rows of 16 bytes, hex + ASCII, addresses lowercase, len capped at 256, hex-arg parsing with 0x prefix, clean error strings. Declared in kernel.h, wired into repl.c + build.sh. It's the Phase 3 debug workhorse (ELF headers, superblocks, page tables).
+- **Implemented by the Nemotron 3 Ultra 550B subagent** (delegation `deleg_d98e0331`, 50 API calls, ~15 min) — first real-world Tier-2 delegation. Reviewed + fixed by AIko: `ADR-XXX` placeholder removed; t9 test input chunked to ≤15 bytes (FIFO burst trap, war story #6). Policy updated with lessons (§6).
+- test.sh v5: **25/25 green** (t9 = 3 new checks), CI green. Commit `d87a2b3`.
+
+**Next:**
+- Phase 3 (Memory & Files): buddy allocator candidate, filesystem, ELF loader, first /bin apps — hexdump ready for it.
+
+**Build state:** kernel.bin 14,352 B (hexdump added); disk.img 49,664 B.
+
+**Open questions:** none blocking.
+
+---
+
 ## 2026-08-05 — 🎉 PHASE 2 COMPLETE — v0.4.0: Two Worlds
 
 **Done:**
