@@ -1,0 +1,5 @@
+# codespell config — discovered natively at the repo root.
+# "ist" is the x86 IDT Interrupt Stack Table field (idt[n].ist, tss.ist[7]),
+# not a typo.
+[codespell]
+ignore-words-list = ist
