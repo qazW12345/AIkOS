@@ -1,0 +1,12 @@
+# Build artifacts (filled in as the project grows)
+build/
+*.o
+*.elf
+*.bin
+*.iso
+*.img
+*.disk
+
+# Editor / OS junk
+Thumbs.db
+.DS_Store

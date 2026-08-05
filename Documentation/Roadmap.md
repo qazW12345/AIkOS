@@ -1,0 +1,35 @@
+# AIkOS Roadmap
+
+The project plan. Every phase has an **exit criterion** — a phase is done when its test demonstrably passes, nothing less.
+
+**Current phase: Phase 0 — not started** (last updated 2026-08-05)
+
+## Phases
+
+| # | Phase | Goal | Exit criterion | Status |
+|---|---|---|---|---|
+| 0 | Proof of Life | Boot in QEMU; banner on VGA + serial console | QEMU boots it; serial log shows banner; clean state on exit | ⬜ not started |
+| 1 | The Machine Wakes | Interrupts, timer ticks, PS/2 keyboard, kernel-mode REPL | Type into the REPL over serial, see echo | ⬜ |
+| 2 | Two Worlds | Paging, user mode, syscalls | A ring-3 process runs and syscalls out | ⬜ |
+| 3 | Memory & Files | Allocators, filesystem, ELF loader, first userland apps | Boots from disk image; runs /bin apps | ⬜ |
+| 4 | A Face | Framebuffer GUI, windows, compositor | Windows draw, drag, close — verified via QEMU screendump | ⬜ |
+| 5 | The Wire | NIC driver, ARP/IP/TCP, socket API | A fetch-style app works over QEMU virtual network | ⬜ |
+| 6 | Own Tongue | Compiler for our own language | Compile + run a program on AIkOS itself | ⬜ |
+| 7 | Real Metal | Boot from USB on real hardware | Boots on a physical machine | ⬜ |
+
+## Non-goals (written down so nobody drifts — these are *chosen* exclusions, not forgotten items)
+
+- **Not a daily-driver OS.** Not a Windows/Linux replacement. Curiosity and learning are the product.
+- **No POSIX compatibility.** We are not cloning Linux.
+- **No multi-user security model.** User mode (Phase 2) exists to learn the mechanics, not to protect users.
+- **No networking before Phase 5.**
+- **No broad real-hardware driver support before Phase 7.** Emulator-first, always.
+
+## How the roadmap changes
+
+If reality disagrees with this roadmap, we don't silently edit it — we write an ADR explaining the change, then update the roadmap to match. The roadmap describes *where we are going*; ADRs describe *how we got here and why*.
+
+## Notes
+
+- Every phase gets its own mini design doc in `Design/` before implementation starts (written for the ambiguous parts only — if there's no trade-off to weigh, a design doc is overhead).
+- Phase 0 open questions (as of 2026-08-05): compiler choice (clang/LLVM vs MSYS2 gcc vs OSDev cross-toolchain zip); boot path (Multiboot2 via GRUB vs custom bootloader).
