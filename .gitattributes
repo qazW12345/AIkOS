@@ -1,0 +1,9 @@
+# Line ending and binary normalization
+* text=auto eol=lf
+
+# Binaries (never touch line endings, never diff)
+*.png binary
+*.iso binary
+*.bin binary
+*.img binary
+*.elf binary
