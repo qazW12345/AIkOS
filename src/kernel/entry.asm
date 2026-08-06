@@ -22,6 +22,9 @@ extern stack_top          ; defined in linker.ld (.bss)
 %ifndef FAULT_SECTORS
 %define FAULT_SECTORS 16
 %endif
+%ifndef FS_SECTORS
+%define FS_SECTORS 64
+%endif
 
 %define PML4  0x9000
 %define PDPT  0xA000
@@ -122,6 +125,12 @@ long_mode:
     mov rsi, 0x14000
     mov rdi, 0x220000
     mov ecx, FAULT_SECTORS * 512 / 8
+    rep movsq
+
+    ; --- copy AIkFS ramdisk up: partition was read to 0x18000 by boot ---
+    mov rsi, 0x18000
+    mov rdi, 0x400000
+    mov ecx, FS_SECTORS * 512 / 8
     rep movsq
 
     mov al, 'K'

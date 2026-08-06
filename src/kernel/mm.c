@@ -73,6 +73,8 @@ void pmm_init(void)
         pmm_mark(p, 1);                 /* PML4/PDPT/PD + bitmap */
     for (uint64_t p = 0x200000 / PMM_PAGE_SIZE; p < 0x240000 / PMM_PAGE_SIZE; p++)
         pmm_mark(p, 1);                 /* user blobs */
+    for (uint64_t p = 0x400000 / PMM_PAGE_SIZE; p < 0x440000 / PMM_PAGE_SIZE; p++)
+        pmm_mark(p, 1);                 /* AIkFS ramdisk (boot copies partition here) */
 
     pmm_free_count = 0;
     for (i = 0; i < PMM_BITMAP_PAGES; i++)
