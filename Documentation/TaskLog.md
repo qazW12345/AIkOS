@@ -7,6 +7,18 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-06 — Team expansion plan documented (proposal, decision pending)
+
+- **NEW** `Documentation/Design/Team-Expansion-Plan.md` — reviewer + research roles
+  (read-only, relieve the merge-gate bottleneck; Phase 3 evidence: 8 defects caught
+  only by review). Explicit non-goal: third implementer (file-ownership ceiling).
+- Candidate models researched: MiMo-V2.5 (1M ctx, SWE-bench Verified 78.6, open-weights,
+  on OpenRouter), Mistral Medium (131–262K, ≥90% Sonnet 3.7 class), DeepSeek V4 Flash #2
+  (reviewer gold standard), local Qwen3-4B (free/private budget reviewer).
+- Decision pending: which models for which roles → becomes ADR-019.
+
+---
+
 ## 2026-08-06 — Kanban orchestration + Gemini worker onboarded (ADR-018)
 
 **Done:**
