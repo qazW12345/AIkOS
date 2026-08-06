@@ -30,7 +30,7 @@ CI grew without changing the core decision:
    gitleaks, checkov, zizmor, codespell. Formatter linters, textlint, and python
    linters are disabled by policy (one throwaway `tools/ppm2png.py`; revisit when
    real python tooling lands).
-- **Supply-chain hardening:** all actions pinned to full SHAs (`owner/repo@sha`), least-privilege workflow permissions, `persist-credentials: false`.
+- **CI REMOVED (2026-08-06):** GitHub Actions retired — the suite always was the arbiter and it runs locally (`./test.sh`); CI added queue time + action-service outages with zero real findings. Verification is the merge-gate discipline (AIko runs the suite + `tools/lint-local.sh` incl. gitleaks before every merge). The gitleaks-only job of PR #21 is also gone (local gitleaks + GitHub native secret scanning as backstop). This supersedes the CI clauses below; the historical record stands.
 - **actions/cache verdict:** NOT adopted — the workflow has no package-manager dependency tree to cache (freestanding C + nasm; toolchain via apt, ~1 min); the dominant CI cost is QEMU wall-clock test time, which caching cannot reduce. Revisit when Phase 3+ userland tooling introduces dependency downloads (npm/pip/cargo-style), or if CI time analysis ever shows container-image pulls dominating.
 
 ## Future considerations

@@ -55,6 +55,14 @@ git branch -D experiment-something     # throw it away (or merge if it worked)
 - Credentials are stored in Git Credential Manager — pushes are silent.
 - Commits are authored as `AIko <aiko@aikos.local>` (see TaskLog; changeable with `git config user.name` if ever wanted).
 
-## CI (ADR-011)
+## CI (ADR-011) — REMOVED 2026-08-06
 
-**Live since 2026-08-05** — `.github/workflows/build.yml` runs `./test.sh` on ubuntu-latest for every push. Token scope history: the original PAT lacked `workflow` (pushes of `.github/workflows/` were rejected); resolved with a token carrying `read:org, repo, workflow`. First green run: `ddd9b17`. If CI ever needs re-wiring: env.sh holds the platform-aware paths (MINGW vs Linux).
+GitHub Actions was retired: the suite runs **locally** (it always was the arbiter —
+`./test.sh`), CI only added queue time and action-service outages (3 infrastructure
+failures in one afternoon, zero real findings). Verification is now the merge-gate
+discipline: **AIko runs `./test.sh` + `tools/lint-local.sh` (incl. gitleaks secrets
+scan) before every merge**; the reviewer agent reviews each PR. GitHub's native
+secret scanning stays as the passive backstop on the public repo. History (for the
+record): workflow live since 2026-08-05, first green run `ddd9b17`; the original
+PAT lacked `workflow` scope (pushes of `.github/workflows/` rejected) — resolved
+with `read:org, repo, workflow`.

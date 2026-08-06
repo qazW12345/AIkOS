@@ -30,6 +30,15 @@ else
     echo "  (shellcheck not found — skipped; run locally if you want the full net)"
 fi
 
+echo "[local-lint] gitleaks (secrets scan — the CI replacement, 2026-08-06)..."
+GITLEAKS="$(command -v gitleaks 2>/dev/null || echo "$LOCALAPPDATA/hermes/scripts/bin/gitleaks.exe")"
+if [ -x "$GITLEAKS" ]; then
+    "$GITLEAKS" detect --source . --redact --no-banner 2>/dev/null || FAIL=1
+else
+    echo "  (gitleaks NOT INSTALLED — install it: winget install gitleaks.gitleaks)"
+    echo "   GitHub native secret scanning is the passive backstop on public repos."
+fi
+
 if [ "$FAIL" -eq 0 ]; then
     echo "[local-lint] OK — style clean"
 else

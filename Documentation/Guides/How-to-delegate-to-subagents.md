@@ -113,10 +113,12 @@ the non-negotiable gate.
 
 ## 2.5 PR/branch workflow for parallel agents (2026-08-05)
 
-The repo is **public**; `main` is **branch-protected** (PRs required, CI must pass,
+The repo is **public**; `main` is **branch-protected** (PRs required; verification
+is the merge-gate discipline — AIko runs the suite + `tools/lint-local.sh` before
+every merge; GitHub Actions was retired 2026-08-06).
 no force-push, linear history). This is what makes multi-agent parallelism safe:
 
-- **One branch per task** (`feat/<name>`), one PR per task, CI runs on every branch
+- **One branch per task** (`feat/<name>`), one PR per task; the worker leaves changes in its worktree, AIko runs the suite locally + lint-local.sh, then merges via API
   push (the workflow triggers on all branches — each PR gets its own suite + lint lane).
 - **Parallel agents use separate worktrees** (`git worktree add <path> -b <branch>`):
   subagents share the machine but must NOT share a working tree — a dirty tree is
