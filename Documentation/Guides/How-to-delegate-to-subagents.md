@@ -118,8 +118,10 @@ is the merge-gate discipline — AIko runs the suite + `tools/lint-local.sh` bef
 every merge; GitHub Actions was retired 2026-08-06).
 no force-push, linear history). This is what makes multi-agent parallelism safe:
 
-- **One branch per task** (`feat/<name>`), one PR per task; the worker leaves changes in its worktree, AIko runs the suite locally + lint-local.sh, then merges via API
-  push (the workflow triggers on all branches — each PR gets its own suite + lint lane).
+- **One branch per task** (`feat/<name>`), one PR per task; implementer cards may
+  **commit + push their own task branch** (git credentials are shared via the
+  credential manager) — but PRs, reviews, and merges stay with AIko (the gate).
+  Researchers/reviewers stay write-only/file-only (no git).
 - **Parallel agents use separate worktrees** (`git worktree add <path> -b <branch>`):
   subagents share the machine but must NOT share a working tree — a dirty tree is
   exactly how two agents tangle each other's edits. Each agent works in its own
