@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 # Least privilege: read-only at workflow level (checkov CKV2_GHA_1); the lint
-# job scopes statuses: write itself (zizmor excessive-permissions).
+# job scopes pull-requests: write itself for gitleaks' PR annotations (zizmor).
 permissions:
   contents: read
 
@@ -52,40 +52,20 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      statuses: write          # job-scoped: only super-linter's status reporter needs it
+      pull-requests: write    # job-scoped: gitleaks' PR leak annotations
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false   # zizmor artipacked
 
-      # shellcheck (build/test scripts) + markdownlint (docs are code) +
-      # yamllint (workflows). Disabled on purpose: clang-format/cpplint would
-      # churn the hand-tuned freestanding kernel style; jscpd flags test.sh's
-      # intentionally-similar QEMU blocks; prettier/biome/JSON formatter taste
-      # fights aren't worth it on config files; the python linters fire on the
-      # one throwaway debug helper (tools/ppm2png.py) — revisit when real
-      # python tooling lands. markdownlint uses the house config at
-      # .github/linters/.markdown-lint.yml (default discovery).
-      - name: Super-Linter
-        uses: super-linter/super-linter@4ce20838b8ab83717e78138c5b3a1407148e0918  # v8.7.0
+      # Secrets scan ONLY (2026-08-06, PR #21): the style linters
+      # (shellcheck/markdownlint/yamllint/codespell) moved LOCAL to
+      # tools/lint-local.sh plus the reviewer agent — the GitHub lint job now
+      # exists solely because gitleaks is the one deterministic check that
+      # cannot be delegated (public repo; a leaked PAT with workflow scope
+      # would let anyone push). Runs in ~30s, no giant container.
+      - name: Gitleaks secrets scan
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e  # v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DEFAULT_BRANCH: main
-          VALIDATE_ALL_CODE_BASES: false
-          VALIDATE_CLANG_FORMAT: false
-          VALIDATE_CPP: false
-          VALIDATE_JSCPD: false
-          VALIDATE_PRETTIER: false
-          VALIDATE_JSON: false
-          VALIDATE_BIOME_FORMAT: false
-          VALIDATE_MARKDOWN_PRETTIER: false
-          VALIDATE_NATURAL_LANGUAGE: false
-          VALIDATE_PYTHON_BLACK: false
-          VALIDATE_PYTHON_PYLINT: false
-          VALIDATE_PYTHON_FLAKE8: false
-          VALIDATE_PYTHON_ISORT: false
-          VALIDATE_PYTHON_RUFF: false
-          VALIDATE_PYTHON_RUFF_FORMAT: false
-          VALIDATE_SHELL_SHFMT: false
-          VALIDATE_YAML_PRETTIER: false
