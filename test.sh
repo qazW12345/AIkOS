@@ -357,8 +357,9 @@ if want_group t18 syscall; then
 echo "[t18] readtest ELF user program (syscall 3 read)"
 rm -f build/readtest.out
 # 'runelf bin/readtest.elf\n' is 24 bytes — exceeds 16-byte FIFO; chunk into
-# two bursts (14 + 10) with a gap (war story #6: multi-burst drops under load)
-( sleep 4; printf 'runelf bin/rea'; sleep 0.5; printf 'dtest.elf\n'; sleep 2; printf 'Z'; sleep 3 ) | \
+# two bursts (15 + 9) with a gap (war story #6: multi-burst drops under load —
+# hardened 2026-08-06 after t19-then-t18 churn ate a byte)
+( sleep 4; printf 'runelf bin/read'; sleep 0.5; printf 'test.elf\n'; sleep 2; printf 'Z'; sleep 3 ) | \
     "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
     -no-reboot -m 32M > build/readtest.out 2>/dev/null &
 QPID=$!
