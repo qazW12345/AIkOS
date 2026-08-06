@@ -7,7 +7,27 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
-## 2026-08-05 — Repo public + branch protection + parallel PR workflow
+## 2026-08-06 — 🎉 PHASE 3 COMPLETE — v0.5.0: Memory & Files
+
+**Done (all via PRs, CI green, 36/36 suite):**
+- **Buddy heap** (PR #2, agent A + 3 review fixes): orders 0-10, aligned pulls, coalesce-on-free; `heap`/`heaptest` (accounting assertion catches leaks + alignment fragmentation).
+- **AIkFS host tooling** (PR #3, agent B, parallel lane): `tools/buildfs.py` (format per ADR-015), `/bin/hello.elf` + `/bin/ver.elf`, build.sh wiring.
+- **Boot-ramdisk** (PR #5, main model): boot.asm loads the partition (new `R` milestone), entry.asm copies to 0x400000, pmm reserves the ramdisk region, t1 chain check, test leads 2s→4s.
+- **fs.c driver** (PR #6, agent): superblock/dir parsing, `fsinfo`/`ls`/`cat`, t13/t14.
+- **ELF loader** (PR #7, agent + main-model `proc_run_elf`): validation + PT_LOAD loading + BSS zero-fill, `runelf`, t15 — **the exit criterion: an ELF app from the filesystem runs in ring 3 and comes home** (`hello from /bin/hello` + `back in kernel`).
+- Version bump: banner `AIkOS v0.5.0 - Memory & Files`; Roadmap Phase 3 ✅, current = Phase 4 (A Face).
+
+**Delegation scorecard (Phase 3):** 4 tasks, 0 self-inflicted regressions; reviewer fixes: buddy 3 (coalesce re-push, order bound, alignment), fs.c 2 (dead code, cast) + 1 pre-existing hexdump var, elf 3 hardening guards (overflow-safe bounds, filesz<=memsz, entry validation). Lessons recorded in the policy §5.
+
+**Next:** Phase 4 — A Face (framebuffer GUI); v0.6.0 target.
+
+**Build state:** v0.5.0; kernel + AIkFS ramdisk (161-sector disk image); CI paths-filter + super-linter green.
+
+**Open questions:** none.
+
+---
+
+## 2026-08-06 — Repo public + branch protection + parallel PR workflow
 
 **Done:**
 - **Repo made public** (Marcel, 2026-08-05) — enables GitHub branch protection (was blocked on the free/private plan).

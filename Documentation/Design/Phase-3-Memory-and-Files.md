@@ -109,7 +109,7 @@ New commands slot into the existing table: `ls`, `cat <file>`, `fsinfo`,
 `runelf <path>`, `heap`, `heaptest`. Each is a file-local handler — the command-table
 refactor pays off exactly as designed.
 
-## Test plan (test.sh v7 — 31 checks)
+## Test plan (test.sh v7 — 36 checks)
 
 Existing t1–t10 (26 checks) unchanged. New (added per implementation chunk):
 
