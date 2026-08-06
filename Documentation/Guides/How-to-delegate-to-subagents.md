@@ -75,15 +75,17 @@ call (verified: reviewer + implementer smoke pass lean; mistral's remaining
 blocker is the provider quota, not prompt size). Web access lives ONLY in the
 researcher profile — implementers/reviewer work from repo docs + cards.
 
-**Rate-limit pacing (free tiers — learned the hard way, 2026-08-06):** all four
-worker profiles carry `model.rate_limit_delay` (gemini 60 s, others 45 s) — on
-HTTP 429 the client **waits for the per-minute budget to refill before
-retrying**, instead of failing a burst. Card briefs for gemini tasks add:
-"the API budget is ~250K tokens/min — prefer targeted searches/greps over whole-
-file reads, and if you hit 429 just pause and retry (the harness waits for you)."
-Burst math that matters: N sequential calls × growing context can exceed the
-per-minute window in seconds (16 calls × ~19K tokens ≈ 300K in 38 s — the
-original memmap crash).
+**Rate-limit pacing (free tiers — learned the hard way, 2026-08-06):** `model.rate_limit_delay`
+is set on the worker profiles but is **currently inert** (normalized in config, never
+consumed by the retry path in this Hermes build — retries use a fixed 2–6 s client
+backoff). The gemini_implementer card hit the **DAILY** Google quota (not the
+per-minute window) after two bursts (~700K input tokens in ~90 s of calls). Working
+mitigations: (1) card briefs demand **search-first reading** (targeted greps over
+whole-file reads — fewer tokens per call); (2) **one gemini card per day** (the
+daily cap is the binding constraint); (3) on a daily-quota 429 the card stays
+blocked until the next day — unblocking only burns more quota. Burst math: N
+sequential calls × growing context exceeds any window in seconds (16 calls ×
+~19K tokens ≈ 300K in 38 s).
 
 **Tier 1 — delegate freely (read-only / low-risk):**
 - Log and test-output analysis: boot milestone chains (`SBMEUFRALCP 1…K`), test.sh result greps, QEMU serial captures
