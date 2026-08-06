@@ -7,6 +7,18 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-06 — New worker profiles: opencode (DeepSeek V4 Flash Free) + mistral
+
+**Done:**
+- **Profile `opencode`** — `deepseek-v4-flash-free` via OpenCode Zen (`https://opencode.ai/zen/v1`, OpenAI-compatible). **FULLY VERIFIED** end-to-end (`hermes chat -p opencode` → "OPENCODE PROFILE OK"). FREE (limited-time; data may be used for training — no secrets in cards).
+- **Profile `mistral`** — `mistral-medium-latest` via `https://api.mistral.ai/v1`. **API-validated** (curl → "MISTRAL OK"; config 400 fixed — `reasoning_effort: medium` unsupported → `high`), but the key's free tier (25K tokens/min) is too tight for Hermes's token-heavy calls (3 retries per call blow the minute budget) → usable for light/one-shot tasks; full agent loops need a tier upgrade.
+- Both cloned from the gemini worker shape (neutral SOUL, memory OFF); keys in `.env` (MISTRAL_API_KEY, OPENCODE_API_KEY); kanban assignees auto-registered (mistral, opencode).
+- Bonus discovery: Zen also hosts free `mimo-v2.5-free`, `nemotron-3-ultra-free`, `north-mini-code-free`.
+
+**Next:** first kanban card for the opencode profile (calibration, per policy §5); mistral → light tasks or tier upgrade.
+
+---
+
 ## 2026-08-06 — Team expansion plan documented (proposal, decision pending)
 
 - **NEW** `Documentation/Design/Team-Expansion-Plan.md` — reviewer + research roles

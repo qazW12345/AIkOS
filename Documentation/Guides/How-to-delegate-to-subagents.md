@@ -48,6 +48,12 @@ data in card bodies or briefs. Empirical note: Gemini's first kernel tasks get
 the same review treatment as Phase 3's (expect reviewer fixes; the suite is the
 arbiter).
 
+**Newer workers (2026-08-06):** profile `opencode` = **deepseek-v4-flash-free**
+(OpenCode Zen gateway, OpenAI-compatible, FREE limited-time — **data may be used
+for training**: treat it like the free endpoints, no secrets, and prefer it for
+non-sensitive tasks). Profile `mistral` = **mistral-medium-latest** (Mistral
+API, 25K tokens/min free tier — light/one-shot tasks only until a tier upgrade).
+
 **Tier 1 — delegate freely (read-only / low-risk):**
 - Log and test-output analysis: boot milestone chains (`SBMEUFRALCP 1…K`), test.sh result greps, QEMU serial captures
 - Spec research with source links (OSDev wiki, Intel SDM behavior, tool docs)
