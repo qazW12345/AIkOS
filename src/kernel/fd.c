@@ -46,14 +46,14 @@ uint64_t fd_open(const char *path)
     return 0xFFFFFFFF;
 }
 
-int fd_close(uint64_t fd)
+uint64_t fd_close(uint64_t fd)
 {
     if (fd < 3 || fd >= 3 + 16) {
-        return -1;
+        return 0xFFFFFFFF;
     }
     int slot = (int)(fd - 3);
     if (!g_fd_table[slot].in_use) {
-        return -1;
+        return 0xFFFFFFFF;
     }
     if (g_fd_table[slot].data) {
         kfree(g_fd_table[slot].data);
