@@ -120,6 +120,7 @@ static const struct repl_cmd cmd_table[] = {
     { "ls",          "ls",                             cmd_ls },
     { "cat",         "cat <file>",                     cmd_cat },
     { "runelf",      "runelf <file>",                  cmd_runelf },
+    { "memmap",      "memmap  - print the E820 memory map", memmap_cmd },
 };
 
 static int cmd_table_size(void)
