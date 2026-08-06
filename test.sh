@@ -253,6 +253,19 @@ wait "$QPID" 2>/dev/null || true
 if grep -q "hello from /bin/hello" build/runelf.out; then ok "t15 runelf hello output"; else bad "t15 runelf hello output"; fi
 if grep -q "back in kernel" build/runelf.out; then ok "t15 runelf kernel survives"; else bad "t15 runelf kernel survives"; fi
 
+echo "[t16] memmap REPL command"
+rm -f build/memmap.out
+# 'memmap\n' is 7 bytes — safe as a single write
+( sleep 4; printf 'memmap\n'; sleep 1 ) | \
+    "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
+    -no-reboot -m 32M > build/memmap.out 2>/dev/null &
+QPID=$!
+sleep 6
+kill "$QPID" 2>/dev/null || true
+wait "$QPID" 2>/dev/null || true
+if grep -q "E820 memory map" build/memmap.out; then ok "t16 memmap header"; else bad "t16 memmap header"; fi
+if grep -q "type=1" build/memmap.out; then ok "t16 memmap usable type"; else bad "t16 memmap usable type"; fi
+
 echo
 echo "RESULT: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
