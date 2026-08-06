@@ -68,11 +68,11 @@ uint64_t fd_close(uint64_t fd)
 int64_t fd_read(uint64_t fd, void *buf, uint64_t len)
 {
     if (fd < 3 || fd >= 3 + 16 || !buf) {
-        return -1;
+        return 0xFFFFFFFF;
     }
     int slot = (int)(fd - 3);
     if (!g_fd_table[slot].in_use) {
-        return -1;
+        return 0xFFFFFFFF;
     }
     struct file_desc *f = &g_fd_table[slot];
     if (f->offset >= f->size) {

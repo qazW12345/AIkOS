@@ -76,19 +76,20 @@ if [ "$USIZE" -gt "$UMAX" ] || [ "$FSIZE" -gt "$UMAX" ]; then
 fi
 echo "       user.bin: $USIZE bytes, userfault.bin: $FSIZE bytes (budget $UMAX)"
 
-# Build ELF user programs for AIkFS (/bin/hello.elf, /bin/ver.elf, /bin/readtest.elf, /bin/opentest.elf, /bin/closetest.elf)
-# Same flags as user/main.c: UCFLAGS + link at 0x200000 (ET_EXEC ELF64)
 echo "[7/7] ELF user programs (ring 3, AIkFS apps)"
+# Same flags as user/main.c: UCFLAGS + link at 0x200000 (ET_EXEC ELF64)
 "$CLANG" --target=x86_64-elf $UCFLAGS -c -o build/hello.o user/hello.c
 "$CLANG" --target=x86_64-elf $UCFLAGS -c -o build/ver.o user/ver.c
 "$CLANG" --target=x86_64-elf $UCFLAGS -c -o build/readtest.o user/readtest.c
 "$CLANG" --target=x86_64-elf $UCFLAGS -c -o build/opentest.o user/opentest.c
 "$CLANG" --target=x86_64-elf $UCFLAGS -c -o build/closetest.o user/closetest.c
+"$CLANG" --target=x86_64-elf $UCFLAGS -c -o build/readfiletest.o user/readfiletest.c
 "$LLD" -Ttext=0x200000 -o build/hello.elf build/hello.o
 "$LLD" -Ttext=0x200000 -o build/ver.elf build/ver.o
 "$LLD" -Ttext=0x200000 -o build/readtest.elf build/readtest.o
 "$LLD" -Ttext=0x200000 -o build/opentest.elf build/opentest.o
 "$LLD" -Ttext=0x200000 -o build/closetest.elf build/closetest.o
+"$LLD" -Ttext=0x200000 -o build/readfiletest.elf build/readfiletest.o
 
 # Stage ELF binaries into build/bin/ for buildfs.py
 mkdir -p build/bin
@@ -97,6 +98,7 @@ cp build/ver.elf build/bin/ver.elf
 cp build/readtest.elf build/bin/readtest.elf
 cp build/opentest.elf build/bin/opentest.elf
 cp build/closetest.elf build/bin/closetest.elf
+cp build/readfiletest.elf build/bin/readfiletest.elf
 
 # Create base disk image (boot + kernel + user + userfault blobs — 97 sectors)
 echo "[8/8] disk image (boot + kernel + user + userfault + AIkFS partition)"
