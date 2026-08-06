@@ -23,14 +23,14 @@ loads, not as flat blobs at fixed LBAs. Three candidate formats:
    counts); block bitmap; root directory with fixed 32-byte entries
    (`name[16]`, type, size, first_block, block_count — 16 entries/block); files as
    **contiguous extents**. One directory level. Full layout: Design/Phase-3.
-2. **Host-side writer** — `tools/mkfs.py` (python — precedent: tools/ppm2png.py)
+2. **Host-side writer** — `tools/buildfs.py` (python — precedent: tools/ppm2png.py)
    bakes a file tree into the partition inside `build/disk.img`; build.sh invokes it.
    No new toolchain dependencies.
 3. **RAM-backed in v1 (initramfs pattern)** — boot.asm copies the FS partition to
    `0x400000` (exactly how user blobs are already copied); the kernel FS driver reads
    from RAM. The disk image carries the identical layout, so a later ATA driver drops
    in without a format change. No ATA/PIO driver in v1 (recorded Phase 3.x).
-4. **Read-only in v1** — content is baked by mkfs.py; runtime allocation/write path
+4. **Read-only in v1** — content is baked by buildfs.py; runtime allocation/write path
    (and file syscalls for userland) is a Phase 3.x candidate.
 
 ## Consequences

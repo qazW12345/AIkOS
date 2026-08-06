@@ -20,7 +20,7 @@ the flat-blob path for new apps, extending ADR-013).
    (ADR-017), with observability (`heap`, `heaptest` REPL commands).
 2. **AIkFS v1** — a custom, from-scratch filesystem (ADR-015): superblock, block
    bitmap, directories, contiguous files. Baked into the disk image by a host-side
-   `tools/mkfs.py`; served to the kernel from a RAM copy (initramfs pattern).
+   `tools/buildfs.py`; served to the kernel from a RAM copy (initramfs pattern).
 3. **ELF loader** — parse ET_EXEC ELF64 files, load `PT_LOAD` segments into the
    user region, run them (ADR-016). First real apps: `/bin/hello.elf`, `/bin/ver.elf`.
 4. **REPL surface** — `ls`, `cat <file>`, `fsinfo`, `runelf <path>`, `heap`,
@@ -30,7 +30,7 @@ the flat-blob path for new apps, extending ADR-013).
 ## Non-goals (recorded as Phase 3.x+ candidates)
 
 - **Higher-half kernel** (ADR-012 deferred; Phase 3+).
-- **Write support in AIkFS** — v1 is read-only (content baked by mkfs.py); a write
+- **Write support in AIkFS** — v1 is read-only (content baked by buildfs.py); a write
   path (block allocation at runtime, cache) is Phase 3.x.
 - **ATA/PIO disk driver** — the FS is RAM-backed in v1 (initramfs); real disk I/O is
   Phase 3.x (the disk image already carries the same layout, so the driver drops in).
@@ -77,7 +77,7 @@ existing blobs stay for the t7/t8 regression). Block = 512 B (one sector).
   16 entries per block. Files are **contiguous extents** (first_block + block_count).
 - **Data blocks** from block 3 onward.
 
-`tools/mkfs.py` (host, python — precedent: tools/ppm2png.py) bakes a directory of
+`tools/buildfs.py` (host, python — precedent: tools/ppm2png.py) bakes a directory of
 files into the partition inside `build/disk.img`; build.sh invokes it after the blob
 payloads. Boot copies the partition to `0x400000` (ramdisk — same pattern as the user
 blob copy-up); `fs_init` parses the superblock from RAM; `fs_ls`, `fs_open(path)`
@@ -93,7 +93,7 @@ rest of `p_memsz`. Entry = `e_entry`. Constraints: `p_vaddr` must land inside
 no `PT_PHDR` handling in v1. `proc.c` gains `proc_run_elf(entry, stack)` reusing the
 existing address-space/return machinery; the flat-blob `proc_run`/`proc_run_fault`
 stay untouched for regression. build.sh produces the app `.elf` files (clang already
-emits them before objcopy); mkfs.py places them in `/bin`.
+emits them before objcopy); buildfs.py places them in `/bin`.
 
 ### Userland apps (user/, new)
 
@@ -131,7 +131,7 @@ with the new disk.img (ADR-004).
   script pins it (the existing user linker pattern).
 - **p_vaddr collisions** — two apps must not claim overlapping addresses; the linker
   base is fixed at 0x200000 and the loader validates the range.
-- **Ramdisk/partition mismatch** — boot copies a fixed 64 sectors; mkfs.py must not
+- **Ramdisk/partition mismatch** — boot copies a fixed 64 sectors; buildfs.py must not
   exceed it (build.sh asserts).
 - **FIFO test input** — new REPL commands are typed by tests; keep each piped write
   ≤15 bytes (war story #6).
@@ -139,6 +139,6 @@ with the new disk.img (ADR-004).
 ## Implementation order
 
 1. buddy.c + `heap`/`heaptest` (ADR-017) — heap before anything that allocates.
-2. mkfs.py + build.sh baking + fs.c + `fsinfo`/`ls`/`cat` (ADR-015).
+2. buildfs.py + build.sh baking + fs.c + `fsinfo`/`ls`/`cat` (ADR-015).
 3. elf.c + proc_run_elf + apps + `runelf` (ADR-016).
 4. test.sh v7; regression sweep; tag v0.5.0 + release.
