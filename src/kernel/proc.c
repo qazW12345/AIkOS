@@ -1,6 +1,6 @@
 // Processes (ADR-013): ring-3 programs in their own address space.
 // Component: proc (ring-3 processes)
-// Provides: proc_run, proc_run_fault; globals proc_kernel_rsp,
+// Provides: proc_run, proc_run_fault, proc_run_elf; globals proc_kernel_rsp,
 //           proc_resume_addr, proc_resume_regs (consumed by entry.asm's
 //           user_return trampoline)
 // Depends on: mm (pmm_alloc_page), entry.asm (kernel PD @0xB000, user_return)
@@ -104,6 +104,27 @@ void proc_run(void)
           "=m"(proc_resume_regs.r13), "=m"(proc_resume_regs.r14),
           "=m"(proc_resume_regs.r15));
     proc_enter(USER_ENTRY, USER_STACK);
+}
+
+/* Run an ELF program (ADR-016): entry is the ELF e_entry (the loader in
+ * elf.c has already copied the segments into the user region). The resume
+ * capture is duplicated per-caller deliberately — the asm reads THIS
+ * function's frame ([rbp]); a shared helper would capture its own frame. */
+void proc_run_elf(uint64_t entry, uint64_t stack)
+{
+    __asm__ volatile(
+        "movq 8(%%rbp), %0\n\t"
+        "movq 0(%%rbp), %1\n\t"
+        "movq %%rbx, %2\n\t"
+        "movq %%r12, %3\n\t"
+        "movq %%r13, %4\n\t"
+        "movq %%r14, %5\n\t"
+        "movq %%r15, %6\n\t"
+        : "=r"(proc_resume_addr), "=r"(proc_resume_regs.rbp),
+          "=m"(proc_resume_regs.rbx), "=m"(proc_resume_regs.r12),
+          "=m"(proc_resume_regs.r13), "=m"(proc_resume_regs.r14),
+          "=m"(proc_resume_regs.r15));
+    proc_enter(entry, stack);
 }
 
 void proc_run_fault(void)
