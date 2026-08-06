@@ -20,6 +20,7 @@ AIkOS/
 ├── AGENTS.md                  thin agent entry point (points into Documentation/)
 └── Documentation/
     ├── README.md              summary + router: state, topic→file map, read order (kept lean, <~150 lines)
+    │                          (2026-08-06: consolidated into the ROOT README.md — single readme)
     ├── Roadmap.md             phases with exit criteria + non-goals
     ├── TaskLog.md             session handoff log, newest first
     ├── Journal.md             human-readable narrative diary (non-technical audience)

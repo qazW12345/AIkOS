@@ -1,0 +1,8 @@
+# gitleaks config (2026-08-06) — local secrets scan (CI removed).
+# The docs' redaction examples ("Result: `REDACTED`") trip generic-api-key;
+# allowlist the marker, not the files — real scans stay enabled everywhere.
+[allowlist]
+description = "AIko docs redaction examples"
+regexes = [
+    '''REDACTED''',
+]

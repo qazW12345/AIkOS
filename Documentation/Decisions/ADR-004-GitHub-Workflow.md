@@ -17,7 +17,7 @@ Constraints from ADR-001: docs-as-code — the source of truth lives *in the rep
 - **Pull requests: no, for now.** Single-writer; branch + merge in git is available if we ever want structured history. If Marcel ever wants to review-before-merge, we adopt PRs then.
 - **CI (GitHub Actions): deferred.** Linux runners ship nasm/gcc/qemu — an automated build + boot-test on every push is genuinely attractive (it would close our ad-hoc-verification gap with a canonical test). Deferred until Phase 0 stabilizes; adoption itself becomes an ADR.
 - **Wiki: no.** `Documentation/` is the wiki, versioned.
-- Root **README.md** exists as the human entry point; AGENTS.md is the agent entry point; `Documentation/README.md` is the deep router.
+- Root **README.md** exists as the human entry point and the deep router; AGENTS.md is the agent entry point (single-readme consolidation, 2026-08-06: `Documentation/README.md` merged into root and removed).
 
 ## Consequences
 
