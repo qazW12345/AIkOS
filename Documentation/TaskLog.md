@@ -13,7 +13,7 @@ The source of truth for "where are we". The newest entry describes the current s
 - **Repo made public** (Marcel, 2026-08-05) — enables GitHub branch protection (was blocked on the free/private plan).
 - **`main` branch-protected**: PRs required, `test`+`lint` CI checks required, enforce-admins on, no force-push, linear history. All merges now flow through PRs.
 - **Delegation policy §2.5**: PR/branch workflow — one branch per task, worktrees for parallel agents (never share a dirty working tree), agents push to their branch only, reviewer merges, file-ownership rule for parallelism, dependency-aware merge order.
-- **First parallel experiment**: buddy allocator agent (main worktree, uncommitted) + second agent on `feat/mkfs-apps` (worktree `E:\Hermes_Agent\projects\AIkOS.mkfs`) building `tools/mkfs.py` + `/bin` user apps in parallel.
+- **First parallel experiment**: buddy allocator agent (main worktree, uncommitted) + second agent on `feat/fstools` (worktree `E:\Hermes_Agent\projects\AIkOS.fstools`) building `tools/buildfs.py` + `/bin` user apps in parallel.
 
 **Next:** Phase 3 chunks (buddy → AIkFS → ELF → v0.5.0).
 
@@ -26,7 +26,7 @@ The source of truth for "where are we". The newest entry describes the current s
 ## 2026-08-05 — Phase 3 designed (Memory & Files)
 
 **Done:**
-- **Design doc** `Documentation/Design/Phase-3-Memory-and-Files.md`: buddy heap (ADR-017), AIkFS v1 read-only custom filesystem, RAM-backed (initramfs) with host-side `tools/mkfs.py` (ADR-015), static ELF64 loader (ADR-016), /bin apps (`hello.elf`, `ver.elf`), REPL additions (`ls`, `cat`, `fsinfo`, `runelf`, `heap`, `heaptest`), memory map v3 (AIkFS ramdisk @0x400000), test plan v7 (**31 checks**: +fsinfo, +ls, +runelf, +heap, +heaptest), implementation order.
+- **Design doc** `Documentation/Design/Phase-3-Memory-and-Files.md`: buddy heap (ADR-017), AIkFS v1 read-only custom filesystem, RAM-backed (initramfs) with host-side `tools/buildfs.py` (ADR-015), static ELF64 loader (ADR-016), /bin apps (`hello.elf`, `ver.elf`), REPL additions (`ls`, `cat`, `fsinfo`, `runelf`, `heap`, `heaptest`), memory map v3 (AIkFS ramdisk @0x400000), test plan v7 (**31 checks**: +fsinfo, +ls, +runelf, +heap, +heaptest), implementation order.
 - **New ADRs:** ADR-015 (AIkFS: custom format, initramfs backing, read-only v1), ADR-016 (ELF static ET_EXEC loading, 0x200000–0x400000 region, reuse proc machinery), ADR-017 (binary buddy over pmm, kmalloc/kfree, heap/heaptest observability — fulfils the ADR-012 deferred candidate).
 - Deferred to Phase 3.x (recorded in the doc's Non-goals): higher-half kernel, FS write support, ATA/PIO driver, file syscalls, slab allocator.
 
