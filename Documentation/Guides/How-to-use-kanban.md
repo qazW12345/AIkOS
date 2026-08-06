@@ -129,10 +129,9 @@ The implement -> review hand-off can run WITHOUT AIko touching the board:
 3. **Notify AIko:** the review watchdog cron (`76edf1cf144a`, every 3 min,
    `scripts/review_watchdog.py`) records `[REVIEW]` completions + implementer
    blocks. It tracks a last-seen event id (state file) and is silent when
-   nothing new. Caveat: no_agent cron output is SAVED, not pushed into a
-   desktop session — in-session, a live watcher loop on the review card id is
-   the notification channel; the cron becomes a live notifier the moment a
-   gateway platform (Telegram etc.) is wired.
+   nothing new. **Delivery: the Discord gateway** (`deliver=discord:…`, thread
+   "Naming the AI Aiko") — verified 2026-08-06 (ok, no delivery error).
+   In-session, a live watcher loop on the review card id is the extra channel.
 4. **AIko's gate stays manual:** the reviewer's verdict does not merge
    anything — AIko verifies findings, runs the suite, merges, and queues the
    next card pair.
