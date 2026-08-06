@@ -1,6 +1,6 @@
 # How to debug AIkOS
 
-> **Status:** current — the Phase 0 debug toolkit (2026-08-05). Serial milestones, QEMU monitor, and war stories.
+> **Status:** current — the project debug toolkit (2026-08-06). Serial milestones, QEMU monitor, and war stories.
 
 ## The debug loop (proven in Phase 0)
 
@@ -20,7 +20,20 @@ C  CR0.PE set                    P  protected mode         1  kernel entry
 
 4. If it dies early: check the milestones; if the boot sector itself fails, add `-monitor stdio` and use `info registers` / `xp /Nbx <addr>` / `screendump`.
 
-## QEMU monitor quirks (Windows)
+## QEMU concurrency (multi-agent, ADR-018)
+
+- **Only one actor runs the suite per worktree** — test.sh now refuses to start
+  if `build/.test.lock` exists (single-runner lock). Separate worktrees are
+  independent (their own build/ dirs).
+- **Never kill QEMU by image name** (`taskkill //F //IM qemu-system-x86_64.exe`
+  kills EVERY instance on the machine — including another agent's in-flight
+  tests, which produced exactly that flaky failure in Phase 3). Kill by PID:
+  capture `$!` at launch, or `taskkill //F //PID <pid>`. The
+  `tools/qemu_run.sh` helper does this for you — it also fixes the stuck-pipe
+  hang (input via `--in-cmd "sleep 4; printf '...'; sleep 1; printf '...'"`,
+  bounded wait, guaranteed exit).
+- Windows QEMU itself is fine with multiple concurrent instances — the
+  collisions were purely the image-name kills and shared build/ dirs.
 
 - `-monitor stdio` works with piped stdin **only if you don't use `communicate()`** — write commands, sleep, kill, then read the file. Telnet/tcp monitor chardevs refused connections in testing.
 - Pattern that works: `(sleep 5; echo "screendump build/x.ppm"; sleep 1; echo quit) | qemu ... -monitor stdio`

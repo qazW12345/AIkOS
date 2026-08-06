@@ -3,7 +3,7 @@
 ; Provides: the boot protocol — kernel + user blobs + AIkFS partition loaded,
 ;           E820 map, A20,
 ;           protected-mode handoff to entry.asm
-; Depends on: build.sh payload layout (KERNEL_SECTORS/USER_SECTORS/FAULT_*
+; Depends on: build.sh payload layout (KERNEL_SECTORS/USER_SECTORS/FAULT_*/FS_*
 ;             defines), BIOS int 13h/15h (hardware behavior, ADR-008 spirit)
 ; Owns: disk layout contract (boot + kernel + user + userfault + AIkFS sectors);
 ;       E820 buffer 0x5000 (count @0x4FFC); low read buffers 0x10000/0x14000/0x18000;

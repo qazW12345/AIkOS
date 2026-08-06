@@ -49,7 +49,7 @@ the same review treatment as Phase 3's (expect reviewer fixes; the suite is the
 arbiter).
 
 **Tier 1 — delegate freely (read-only / low-risk):**
-- Log and test-output analysis: boot milestone chains (`SBMEUFRA LCP 1…K`), test.sh result greps, QEMU serial captures
+- Log and test-output analysis: boot milestone chains (`SBMEUFRALCP 1…K`), test.sh result greps, QEMU serial captures
 - Spec research with source links (OSDev wiki, Intel SDM behavior, tool docs)
 - Documentation drafting from bullet points: ADR summaries, TaskLog/Journal entries, Roadmap table edits, guide updates
 - Boilerplate generation following existing patterns: linker scripts, keymaps, test additions, build.sh sections

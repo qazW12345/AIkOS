@@ -8,7 +8,8 @@ case "$(uname -s)" in
         CLANG="/c/Program Files/LLVM/bin/clang.exe"
         LLD="/c/Program Files/LLVM/bin/ld.lld.exe"
         OBJCOPY="/c/Program Files/LLVM/bin/llvm-objcopy.exe"
-        QEMU="C:/Program Files/qemu/qemu-system-x86_64.exe"
+        QEMU="qemu-system-x86_64"
+        command -v "$QEMU" >/dev/null 2>&1 || QEMU="C:/Program Files/qemu/qemu-system-x86_64.exe"
         PYTHON="python"          # never python3 on this machine (see Guides)
         ;;
     Linux)

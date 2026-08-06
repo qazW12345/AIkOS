@@ -7,6 +7,9 @@ build/
 *.img
 *.disk
 
+# Old/redundant files staged for periodic review (see AGENTS.md housekeeping)
+archive/
+
 # Editor / OS junk
 Thumbs.db
 .DS_Store
