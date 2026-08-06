@@ -21,7 +21,7 @@ jobs:
     steps:
       # Actions pinned to full SHAs (zizmor unpinned-uses; supply-chain):
       #   actions/checkout@11d5960a… = v4
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0        # paths-filter diffs against the default-branch merge-base
           persist-credentials: false   # zizmor artipacked: don't leave the token in .git/config
@@ -54,7 +54,7 @@ jobs:
       contents: read
       statuses: write          # job-scoped: only super-linter's status reporter needs it
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false   # zizmor artipacked

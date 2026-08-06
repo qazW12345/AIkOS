@@ -1,7 +1,7 @@
 # AIkOS Documentation — Summary & Router
 
-> **Status:** Phase 0 SHIPPED (v0.1.0, 2026-08-05) — boots in QEMU, banner on VGA + serial. Phase 1 (interrupts, timer, keyboard) not started.
-> **Last updated:** 2026-08-05
+> **Status:** Phase 3 SHIPPED (v0.5.0, 2026-08-06) — buddy heap, AIkFS filesystem + ramdisk, ELF loader, /bin apps (36/36 suite green). Phase 4 (A Face — framebuffer GUI) next. Team: AIko (orchestrator/reviewer) + Nemotron + Gemini workers via kanban (ADR-018).
+> **Last updated:** 2026-08-06
 
 ## What is AIkOS?
 
@@ -10,6 +10,10 @@ A from-scratch hobby operating system for x86-64, built as a multi-year project 
 ## Where we are
 
 - **Phase 0 (Proof of Life): DONE — v0.1.0** (2026-08-05). Boots in QEMU via our own boot sector, reaches 64-bit long mode, prints the banner to VGA + serial, halts. `test.sh` green; release tagged.
+- **Phase 1 (The Machine Wakes): DONE — v0.2.0** (2026-08-05). Interrupts, timer ticks, PS/2 keyboard, kernel-mode REPL, panic dumps.
+- **Phase 1.5 (The Senses): DONE — v0.3.0** (2026-08-05). kprintf, RTC/time, CPUID, VGA scroll, keyboard REPL, CI green.
+- **Phase 2 (Two Worlds): DONE — v0.4.0** (2026-08-05). Paging, user mode, syscalls (int 0x80), ring-3 programs.
+- **Phase 3 (Memory & Files): DONE — v0.5.0** (2026-08-06). Buddy heap, AIkFS + ramdisk, ELF loader, /bin apps; test.sh v7 **36/36**; kanban orchestration (ADR-018).
 - Full phase list with exit criteria: `Roadmap.md`.
 
 ## Topic map — read this to find things

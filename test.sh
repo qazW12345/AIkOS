@@ -1,6 +1,17 @@
 #!/usr/bin/env bash
 # AIkOS Phase 2 acceptance tests (Design/Phase-2-Two-Worlds.md):
 #   t1 regression  — boot + banner (v0.5.0)
+
+# Single-runner lock (multi-agent safety, ADR-018): only one suite per worktree.
+# Two actors in the SAME tree would clobber build/serial.log; separate worktrees
+# have separate build/ dirs and need no coordination.
+mkdir -p build
+if [ -d build/.test.lock ]; then
+    echo "test.sh: another suite is running in this worktree (build/.test.lock exists) — exiting."
+    exit 1
+fi
+mkdir build/.test.lock
+trap 'rmdir build/.test.lock 2>/dev/null' EXIT
 #   t2 REPL        — help/echo/ticks over -serial stdio
 #   t3 keyboard    — scancodes + keyboard-typed command (sendkey)
 #   t4 panic       — ud2 -> exception dump + halt (ADR-009)

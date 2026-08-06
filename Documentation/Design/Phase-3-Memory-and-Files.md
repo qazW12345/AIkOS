@@ -25,7 +25,7 @@ the flat-blob path for new apps, extending ADR-013).
    user region, run them (ADR-016). First real apps: `/bin/hello.elf`, `/bin/ver.elf`.
 4. **REPL surface** — `ls`, `cat <file>`, `fsinfo`, `runelf <path>`, `heap`,
    `heaptest` — all testable over serial.
-5. **test.sh v7** — the suite grows to ~31 checks; all 26 existing checks stay green.
+5. **test.sh v7** — the suite grows to 36 checks; all 26 existing checks stay green.
 
 ## Non-goals (recorded as Phase 3.x+ candidates)
 

@@ -21,3 +21,18 @@ AIkOS is a from-scratch hobby operating system. This file is the entry point for
 - Docs are code: they live in git, versioned with the project.
 - The task log is the handoff mechanism — its newest entry is the source of truth for "where are we".
 - If reality disagrees with a document, change the document (or write an ADR) — never leave silent drift.
+
+## Housekeeping: the archive/ folder
+
+Old/redundant files are NOT deleted on sight — they move to `archive/` (gitignored),
+then a weekly review confirms and deletes them:
+
+1. Found something stale (debug logs, CI zips, accidental artifacts)? `git mv` or
+   plain `mv` it into `archive/` (keep names unchanged — the review needs to see
+   what it is).
+2. The weekly `archive-review` cron lists the folder with ages/sizes and flags
+   files older than 30 days — that's the inspection trigger.
+3. On review: confirmed redundant → delete; might be useful → keep; needed again
+   → move back. Note the verdict in the weekly cron reply.
+4. Never delete from `archive/` without the review step; never put git-tracked
+   files there (they belong in git history, not the archive).
