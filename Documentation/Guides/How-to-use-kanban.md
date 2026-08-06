@@ -88,3 +88,26 @@ Boot path / entry.asm surgery, ring-3 machinery (proc.c), memory management
 design, debugging sessions, the merge gate, suite runs, ADR/design decisions.
 War-story territory stays on the main model — the kanban doesn't change the
 Tier-3 rule, it just formalizes how the other tiers are queued.
+
+## Verification cards (the review loop, 2026-08-06)
+
+The board has NO native `review` stage — the status enum accepts `review` but
+the dispatcher/dashboard treat it as a forward-compat value (canonical statuses:
+triage, todo, ready, running, blocked, done, archived). The native ways to run
+verification:
+
+1. **Implementer hand-back:** on finishing, the worker calls
+   `kanban_block(reason="review-required: …", kind="needs_input")` — the P5
+   human-in-the-loop pattern (surfaces to AIko). This is the correct protocol;
+   do NOT have workers mark cards done before review.
+2. **Verification card (P2 pipeline):** create `[REVIEW] <subject>` assigned to
+   `deepseek_reviewer` with `--parent <implementer-card>`. Gated: it promotes to
+   `ready` when the implementer card reaches `done` — right for POST-merge
+   verification.
+3. **Pre-merge review:** when the review must run BEFORE the merge (syscall
+   series rule — bugs must not compound), `hermes kanban promote <review-card>
+   --force` overrides the parent gate while the implementer card is still
+   blocked on needs_input. The link stays for the audit trail.
+4. **Reviewer contract:** checklist-driven (ABI/spec/bounds/test-evidence/
+   contracts), findings cite file:line, verdict is a proposal — never the gate.
+   AIko verifies findings + runs the suite + merges.
