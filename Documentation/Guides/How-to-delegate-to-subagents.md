@@ -75,17 +75,15 @@ call (verified: reviewer + implementer smoke pass lean; mistral's remaining
 blocker is the provider quota, not prompt size). Web access lives ONLY in the
 researcher profile — implementers/reviewer work from repo docs + cards.
 
-**Rate-limit pacing (free tiers — learned the hard way, 2026-08-06):** `model.rate_limit_delay`
-is set on the worker profiles but is **currently inert** (normalized in config, never
-consumed by the retry path in this Hermes build — retries use a fixed 2–6 s client
-backoff). The gemini_implementer card hit the **DAILY** Google quota (not the
-per-minute window) after two bursts (~700K input tokens in ~90 s of calls). Working
-mitigations: (1) card briefs demand **search-first reading** (targeted greps over
-whole-file reads — fewer tokens per call); (2) **one gemini card per day** (the
-daily cap is the binding constraint); (3) on a daily-quota 429 the card stays
-blocked until the next day — unblocking only burns more quota. Burst math: N
-sequential calls × growing context exceeds any window in seconds (16 calls ×
-~19K tokens ≈ 300K in 38 s).
+**Rate-limit pacing (2026-08-06):** all gemini traffic flows through a local
+**budget-governor proxy** (`scripts/gemini_budget_proxy.py`, localhost:8787,
+keep-alive cron `e7a0b4e562f3` every 5 min) that enforces 50% of the paid-tier
+limits: **2,000 req/min · 2M tokens/min (token bucket, held not dropped) ·
+75K req/day (persisted)**. `model.rate_limit_delay` is inert in this Hermes
+build (never consumed) — the proxy is the working throttle. Card briefs still
+demand search-first reading (fewer tokens/call). NOTE: the July 2026 blocker was
+the project's **monthly spend cap** at ai.studio/spend — check it if the API
+returns "exceeded its monthly spending cap".
 
 **Tier 1 — delegate freely (read-only / low-risk):**
 - Log and test-output analysis: boot milestone chains (`SBMEUFRALCP 1…K`), test.sh result greps, QEMU serial captures
