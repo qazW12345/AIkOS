@@ -3,7 +3,7 @@
 > **Status:** proposal — not decided. Marcel is weighing candidate models
 > (Mistral Medium, Xiaomi MiMo-V2.5, a second DeepSeek V4 Flash) before
 > choosing. This document fixes the *architecture* so the *model choices*
-> can slot in without redesign. When models are chosen, this becomes ADR-019.
+> can slot in without redesign. When models are chosen, this becomes ADR-019 (now written: `Documentation/Decisions/ADR-019-Team-Expansion.md`).
 > Companion: Guides/How-to-use-kanban.md (the board), ADR-018 (current team).
 
 ## 1. The case, in one paragraph
@@ -88,7 +88,7 @@ explain the failure mode; "no issues" is only accepted with the checklist shown:
 1. Profiles: `reviewer` + `research` (model per decision; `hermes profile create`).
 2. Kanban conventions: card-type prefixes (`[REVIEW]`, `[RESEARCH]`), review cards
    `link` their implementer card; READ-ONLY role note on the board.
-3. ADR-019 (supersedes the "two workers" clause of ADR-018) with the chosen matrix.
+3. ADR-019 (supersedes the "two workers" clause of ADR-018) — **written 2026-08-06**; the role design below is its implementation.
 4. No CI changes: read-only lanes can't collide; docs PRs already paths-filtered.
 5. Calibration: first REAL review card + first REAL research card get the same
    validation treatment as every other onboarding (evidence, review, record).
