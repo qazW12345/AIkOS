@@ -48,31 +48,42 @@ data in card bodies or briefs. Empirical note: Gemini's first kernel tasks get
 the same review treatment as Phase 3's (expect reviewer fixes; the suite is the
 arbiter).
 
-**Newer workers (2026-08-06):** profile `Deepseek_Reviewer` = **deepseek-v4-flash-free**
+**Newer workers (2026-08-06):** profile `deepseek_reviewer` = **deepseek-v4-flash-free**
 (OpenCode Zen gateway, OpenAI-compatible, FREE limited-time — **data may be used
 for training**: treat it like the free endpoints, no secrets, and prefer it for
-non-sensitive tasks). Profile `Mimo_Researcher` = **mimo-v2.5-free** (Zen gateway, 1M
+non-sensitive tasks). Profile `mimo_researcher` = **mimo-v2.5-free** (Zen gateway, 1M
 context omnimodal, free — verified end-to-end). `mistral-medium-latest` was tried
 and **PARKED then deleted**: the free tier's quota refills ~1 tiny call per 30 min
 (measured), unusable even with lean prompts — fine only for occasional
-direct-curl one-shots. Profile names follow the `Model_Role` convention (renamed
-2026-08-06; `default` → `AIko`).
+direct-curl one-shots. Profile names follow the `model_role` convention (Hermes
+enforces lowercase; the root/main profile stays `default` — it cannot be
+renamed).
 
 **Role design + lean profiles (2026-08-06):**
 
 | Profile | Model | Role | Toolsets |
 |---|---|---|---|
-| `Nemotron_Implementer` | nemotron-3-ultra-550b:free | **implementer** | file, terminal, search, todo |
-| `Gemini_Implementer` | gemini-3.5-flash-lite | **implementer** | file, terminal, search, todo |
-| `Deepseek_Reviewer` | deepseek-v4-flash-free | **reviewer** (read-only; checklist + line-cited findings; never merges) | file, terminal, search |
-| `Mimo_Researcher` | mimo-v2.5-free | **researcher** (source-first, verbatim cites, URL evidence) | web, file |
-| `AIko` | deepseek-v4-flash | orchestrator + gate (formerly `default`) | full |
+| `nemotron_implementer` | nemotron-3-ultra-550b:free | **implementer** | file, terminal, search, todo |
+| `gemini_implementer` | gemini-3.5-flash-lite | **implementer** | file, terminal, search, todo |
+| `deepseek_reviewer` | deepseek-v4-flash-free | **reviewer** (read-only; checklist + line-cited findings; never merges) | file, terminal, search |
+| `mimo_researcher` | mimo-v2.5-free | **researcher** (source-first, verbatim cites, URL evidence) | web, file |
+| `default` (AIko) | deepseek-v4-flash | orchestrator + gate (the root profile — cannot be renamed, per Hermes) | full |
 
 All four: neutral SOUL, memory OFF, **no personalities, no MCP servers, no
 skills catalog, no cron** — minimal harness = smaller prompts = fewer tokens per
 call (verified: reviewer + implementer smoke pass lean; mistral's remaining
 blocker is the provider quota, not prompt size). Web access lives ONLY in the
 researcher profile — implementers/reviewer work from repo docs + cards.
+
+**Rate-limit pacing (2026-08-06):** all gemini traffic flows through a local
+**budget-governor proxy** (`scripts/gemini_budget_proxy.py`, localhost:8787,
+keep-alive cron `e7a0b4e562f3` every 5 min) that enforces 50% of the paid-tier
+limits: **2,000 req/min · 2M tokens/min (token bucket, held not dropped) ·
+75K req/day (persisted)**. `model.rate_limit_delay` is inert in this Hermes
+build (never consumed) — the proxy is the working throttle. Card briefs still
+demand search-first reading (fewer tokens/call). NOTE: the July 2026 blocker was
+the project's **monthly spend cap** at ai.studio/spend — check it if the API
+returns "exceeded its monthly spending cap".
 
 **Tier 1 — delegate freely (read-only / low-risk):**
 - Log and test-output analysis: boot milestone chains (`SBMEUFRALCP 1…K`), test.sh result greps, QEMU serial captures
