@@ -113,3 +113,26 @@ verification:
 4. **Reviewer contract:** checklist-driven (ABI/spec/bounds/test-evidence/
    contracts), findings cite file:line, verdict is a proposal — never the gate.
    AIko verifies findings + runs the suite + merges.
+
+## The auto-review chain (2026-08-06)
+
+The implement -> review hand-off can run WITHOUT AIko touching the board:
+
+1. **Create the pair upfront:** when creating an implementer card, also create
+   `[REVIEW] <subject>` assigned to `deepseek_reviewer` with
+   `--parent <implementer-card>`. The dispatcher auto-promotes the review child
+   to `ready` the moment the implementer card reaches `done`.
+2. **Implementers COMPLETE when done** (`kanban_complete` with the evidence
+   summary + metadata) — completing triggers the chain. `kanban_block` is
+   reserved for real blockers (quota, ambiguity, stuck work) — those surface to
+   AIko via the watchdog instead.
+3. **Notify AIko:** the review watchdog cron (`76edf1cf144a`, every 3 min,
+   `scripts/review_watchdog.py`) records `[REVIEW]` completions + implementer
+   blocks. It tracks a last-seen event id (state file) and is silent when
+   nothing new. Caveat: no_agent cron output is SAVED, not pushed into a
+   desktop session — in-session, a live watcher loop on the review card id is
+   the notification channel; the cron becomes a live notifier the moment a
+   gateway platform (Telegram etc.) is wired.
+4. **AIko's gate stays manual:** the reviewer's verdict does not merge
+   anything — AIko verifies findings, runs the suite, merges, and queues the
+   next card pair.
