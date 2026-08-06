@@ -121,6 +121,13 @@ no force-push, linear history). This is what makes multi-agent parallelism safe:
 - **One branch per task** (`feat/<name>`), one PR per task; implementer cards may
   **commit + push their own task branch** (git credentials are shared via the
   credential manager) — but PRs, reviews, and merges stay with AIko (the gate).
+- **Test evidence is a SUBSET by default** (modular suite, 2026-08-06): cards
+  run `./test.sh <subsystem>` (syscall/fs/mm/ring3/debug) — core+static always
+  included, untouched subsystems skipped, subsumed tests dropped. The full
+  suite (`./test.sh`) is the batch-end + release gate. `tools/test_plan.sh
+  <changed-files>` prints the right command; boot-path/kernel.h changes always
+  mean FULL. New test groups must be wrapped in `want_group` (see test.sh
+  header) or they won't participate in subsets.
   Researchers/reviewers stay write-only/file-only (no git).
 - **Parallel agents use separate worktrees** (`git worktree add <path> -b <branch>`):
   subagents share the machine but must NOT share a working tree — a dirty tree is
