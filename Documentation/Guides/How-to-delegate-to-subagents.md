@@ -51,8 +51,27 @@ arbiter).
 **Newer workers (2026-08-06):** profile `opencode` = **deepseek-v4-flash-free**
 (OpenCode Zen gateway, OpenAI-compatible, FREE limited-time — **data may be used
 for training**: treat it like the free endpoints, no secrets, and prefer it for
-non-sensitive tasks). Profile `mistral` = **mistral-medium-latest** (Mistral
-API, 25K tokens/min free tier — light/one-shot tasks only until a tier upgrade).
+non-sensitive tasks). Profile `researcher` = **mimo-v2.5-free** (Zen gateway, 1M
+context omnimodal, free — verified end-to-end). Profile `mistral` =
+mistral-medium-latest is **PARKED**: the free tier's quota refills ~1 tiny call
+per 30 min (measured), so even a lean Hermes prompt can't sustain a session —
+fine only for occasional direct-curl one-shots.
+
+**Role design + lean profiles (2026-08-06):**
+
+| Profile | Model | Role | Toolsets |
+|---|---|---|---|
+| `nemotron` | nemotron-3-ultra-550b:free | **implementer** | file, terminal, search, todo |
+| `gemini` | gemini-3.5-flash-lite | **implementer** | file, terminal, search, todo |
+| `opencode` | deepseek-v4-flash-free | **reviewer** (read-only; checklist + line-cited findings; never merges) | file, terminal, search |
+| `researcher` | mimo-v2.5-free | **researcher** (source-first, verbatim cites, URL evidence) | web, file |
+| `mistral` | mistral-medium-latest | **PARKED** — free-tier quota refills ~1 tiny call per 30 min; unusable for agent loops even with lean prompts (verified 2026-08-06) | web, file |
+
+All four: neutral SOUL, memory OFF, **no personalities, no MCP servers, no
+skills catalog, no cron** — minimal harness = smaller prompts = fewer tokens per
+call (verified: reviewer + implementer smoke pass lean; mistral's remaining
+blocker is the provider quota, not prompt size). Web access lives ONLY in the
+researcher profile — implementers/reviewer work from repo docs + cards.
 
 **Tier 1 — delegate freely (read-only / low-risk):**
 - Log and test-output analysis: boot milestone chains (`SBMEUFRALCP 1…K`), test.sh result greps, QEMU serial captures
