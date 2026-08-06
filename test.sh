@@ -47,7 +47,7 @@ bad() { echo "FAIL: $1"; FAIL=$((FAIL+1)); }
 #                  suite (./test.sh) — see tools/test_plan.sh for the mapper.
 FILTER="${1:-}"
 case "$FILTER" in ""|full|all) FILTER="";; esac
-GROUP_SYSCALL="t8 t18 t19"
+GROUP_SYSCALL="t8 t18 t19 t20"
 GROUP_RING3="t7 t8 t15"
 GROUP_FS="t13 t14 t15"
 GROUP_MM="t11 t12 t16"
@@ -333,6 +333,21 @@ if grep -q "open:3" build/opentest.out; then ok "t19 open syscall returns fd 3";
 if grep -q "user exited" build/opentest.out; then ok "t19 opentest exited"; else bad "t19 opentest exited"; fi
 fi
 
+if want_group t20 syscall; then
+echo "[t20] runelf closetest.elf (close syscall)"
+rm -f build/closetest.out
+# 'runelf bin/closetest.elf\n' is 24 bytes — chunk into 14 + 10 with gap
+( sleep 4; printf 'runelf bin/clo'; sleep 0.3; printf 'setest.elf\n'; sleep 4 ) | \
+    "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
+    -no-reboot -m 32M > build/closetest.out 2>/dev/null &
+QPID=$!
+sleep 10
+kill "$QPID" 2>/dev/null || true
+wait "$QPID" 2>/dev/null || true
+if grep -q "close:0" build/closetest.out; then ok "t20 close syscall returns 0"; else bad "t20 close syscall returns 0"; fi
+if grep -q "back in kernel" build/closetest.out; then ok "t20 closetest kernel survives"; else bad "t20 closetest kernel survives"; fi
+fi
+
 echo "[t17] ADR-014 contract validator (host-side, no QEMU)"
 rm -f build/contracts.out
 python tools/check_contracts.py > build/contracts.out 2>&1
@@ -342,9 +357,8 @@ if want_group t18 syscall; then
 echo "[t18] readtest ELF user program (syscall 3 read)"
 rm -f build/readtest.out
 # 'runelf bin/readtest.elf\n' is 24 bytes — exceeds 16-byte FIFO; chunk into
-# two bursts (15 + 9) with a gap (war story #6: multi-burst drops under load —
-# hardened 2026-08-06 after t19-then-t18 churn ate a byte)
-( sleep 4; printf 'runelf bin/read'; sleep 0.5; printf 'test.elf\n'; sleep 2; printf 'Z'; sleep 3 ) | \
+# two bursts (14 + 10) with a gap (war story #6: multi-burst drops under load)
+( sleep 4; printf 'runelf bin/rea'; sleep 0.5; printf 'dtest.elf\n'; sleep 2; printf 'Z'; sleep 3 ) | \
     "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
     -no-reboot -m 32M > build/readtest.out 2>/dev/null &
 QPID=$!

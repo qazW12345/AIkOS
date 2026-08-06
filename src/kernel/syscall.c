@@ -4,10 +4,10 @@
 // Depends on: idt (gate 0x80), entry.asm (user_return), serial (write
 //             syscall), kernel.h (stack_top for the frame rewrite)
 // Owns: the syscall ABI (eax=number, rdi/rsi/rdx/r10); numbers 1=write,
-//       2=exit, 3=read, 4=open
+//       2=exit, 3=read, 4=open, 5=close
 // ABI: number in eax, args in rdi/rsi/rdx/r10 (SysV-style).
 // Syscalls: 1 = write(ptr, len), 2 = exit(), 3 = read(fd, ptr, len),
-//           4 = open(path).
+//           4 = open(path), 5 = close(fd).
 
 #include "kernel.h"
 
@@ -57,6 +57,12 @@ void syscall_dispatch(struct isr_frame *f)
         const char *path = (const char *)f->rdi;
         kprintf("SYSCALL 4 (open) path=%s\r\n", path ? path : "(null)");
         f->rax = fd_open(path);
+        break;
+    }
+    case 5: {                           /* close */
+        uint64_t fd = f->rdi;
+        kprintf("SYSCALL 5 (close) fd=%lu\r\n", fd);
+        f->rax = fd_close(fd);
         break;
     }
     default:

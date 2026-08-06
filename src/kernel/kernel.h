@@ -123,7 +123,7 @@ void fs_info(void);
 
 /* fd.c — file descriptor table */
 uint64_t fd_open(const char *path);
-int fd_close(uint64_t fd);
+uint64_t fd_close(uint64_t fd);
 int64_t fd_read(uint64_t fd, void *buf, uint64_t len);
 
 #endif
