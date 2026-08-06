@@ -105,4 +105,10 @@ extern uint64_t proc_resume_addr;  /* REPL resume point (captured value) */
 /* hexdump.c — memory dump tool */
 void hexdump(uint64_t addr, uint64_t len);
 
+/* fs.c — AIkFS driver (ADR-015) */
+void fs_init(void);
+void fs_ls(void);
+int fs_read(const char *name, uint8_t **out, uint32_t *out_size);
+void fs_info(void);
+
 #endif

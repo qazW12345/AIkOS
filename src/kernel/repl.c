@@ -2,8 +2,8 @@
 // Component: repl (kernel command line)
 // Provides: repl_run (never returns), repl_input_putc (queue producer for
 //           keyboard IRQ / serial IRQ when it exists)
-// Depends on: serial (polled RX), printf (kprintf), vga, rtc, cpuid,
-//             proc (run/runfault), hexdump
+// Depends on: serial (polled RX), printf (kprintf), vga, rtc, cpuid, proc (run/runfault),
+//             hexdump, fs (fsinfo, ls, cat)
 // Owns: the SPSC input queue; the line editor; command dispatch table
 
 #include "kernel.h"
@@ -91,6 +91,9 @@ static void cmd_runfault(const char *args);
 static void cmd_hexdump(const char *args);
 static void cmd_heap(const char *args);
 static void cmd_heaptest(const char *args);
+static void cmd_fsinfo(const char *args);
+static void cmd_ls(const char *args);
+static void cmd_cat(const char *args);
 
 struct repl_cmd {
     const char *name;                  /* command word, e.g. "echo" */
@@ -112,6 +115,9 @@ static const struct repl_cmd cmd_table[] = {
     { "hexdump",     "hexdump <addr> <len>",           cmd_hexdump },
     { "heap",        "heap",                           cmd_heap },
     { "heaptest",    "heaptest",                       cmd_heaptest },
+    { "fsinfo",      "fsinfo",                         cmd_fsinfo },
+    { "ls",          "ls",                             cmd_ls },
+    { "cat",         "cat <file>",                     cmd_cat },
 };
 
 static int cmd_table_size(void)
@@ -398,6 +404,43 @@ static void cmd_heaptest(const char *args)
         kprintf("heaptest OK\r\n");
     else
         kprintf("heaptest FAIL\r\n");
+}
+
+static void cmd_fsinfo(const char *args)
+{
+    (void)args;
+    fs_info();
+}
+
+static void cmd_ls(const char *args)
+{
+    (void)args;
+    fs_ls();
+}
+
+static void cmd_cat(const char *args)
+{
+    while (*args == ' ')
+        args++;
+
+    if (*args == '\0') {
+        kprintf("cat: usage: cat <file>\r\n");
+        return;
+    }
+
+    uint8_t *buf;
+    uint32_t size;
+    if (fs_read(args, &buf, &size) != 0) {
+        kprintf("cat: not found\r\n");
+        return;
+    }
+
+    // Print raw bytes
+    for (uint32_t i = 0; i < size; i++) {
+        serial_putc(buf[i]);
+    }
+    serial_write_string("\r\n");
+    kfree(buf);
 }
 
 static void repl_exec(char *cmd)
