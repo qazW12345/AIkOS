@@ -54,6 +54,21 @@ for training**: treat it like the free endpoints, no secrets, and prefer it for
 non-sensitive tasks). Profile `mistral` = **mistral-medium-latest** (Mistral
 API, 25K tokens/min free tier — light/one-shot tasks only until a tier upgrade).
 
+**Role design + lean profiles (2026-08-06):**
+
+| Profile | Model | Role | Toolsets |
+|---|---|---|---|
+| `nemotron` | nemotron-3-ultra-550b:free | **implementer** | file, terminal, search, todo |
+| `gemini` | gemini-3.5-flash-lite | **implementer** | file, terminal, search, todo |
+| `opencode` | deepseek-v4-flash-free | **reviewer** (read-only; checklist + line-cited findings; never merges) | file, terminal, search |
+| `mistral` | mistral-medium-latest | **researcher** (source-first, verbatim cites, URL evidence) | web, file |
+
+All four: neutral SOUL, memory OFF, **no personalities, no MCP servers, no
+skills catalog, no cron** — minimal harness = smaller prompts = fewer tokens per
+call (verified: reviewer + implementer smoke pass lean; mistral's remaining
+blocker is the provider quota, not prompt size). Web access lives ONLY in the
+researcher profile — implementers/reviewer work from repo docs + cards.
+
 **Tier 1 — delegate freely (read-only / low-risk):**
 - Log and test-output analysis: boot milestone chains (`SBMEUFRALCP 1…K`), test.sh result greps, QEMU serial captures
 - Spec research with source links (OSDev wiki, Intel SDM behavior, tool docs)
