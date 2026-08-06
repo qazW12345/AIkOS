@@ -7,6 +7,7 @@
 // lives in each file's header block. Read a contract before its code.
 
 #include <stdint.h>
+#include <stddef.h>
 
 /* interrupt frame — layout must match interrupt.asm's common entry exactly */
 struct isr_frame {
@@ -81,6 +82,13 @@ void repl_input_putc(char c);
 void pmm_init(void);
 void *pmm_alloc_page(void);
 void pmm_free_page(void *page);
+void *pmm_alloc_contiguous(uint32_t pages);
+
+/* buddy.c — kernel heap (ADR-017) */
+void buddy_init(void);
+void *kmalloc(size_t size);
+void kfree(void *ptr);
+void heap_stats(uint64_t *free_pages, int *largest_order, uint64_t *allocated_blocks);
 
 /* tss.c — task state segment (ADR-013) */
 void tss_init(void);
