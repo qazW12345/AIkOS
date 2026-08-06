@@ -4,7 +4,7 @@
 // Depends on: idt (gate 0x80), entry.asm (user_return), serial (write
 //             syscall), kernel.h (stack_top for the frame rewrite)
 // Owns: the syscall ABI (eax=number, rdi/rsi/rdx/r10); numbers 1=write,
-//       2=exit, 3=read, 4=open, 5=close
+//       2=exit, 3=read, 4=open, 5=close, 6=read_file
 // ABI: number in eax, args in rdi/rsi/rdx/r10 (SysV-style).
 // Syscalls: 1 = write(ptr, len), 2 = exit(), 3 = read(fd, ptr, len),
 //           4 = open(path), 5 = close(fd), 6 = read_file(fd, buf, len).

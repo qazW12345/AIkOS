@@ -78,7 +78,6 @@ echo "       user.bin: $USIZE bytes, userfault.bin: $FSIZE bytes (budget $UMAX)"
 
 echo "[7/7] ELF user programs (ring 3, AIkFS apps)"
 # Same flags as user/main.c: UCFLAGS + link at 0x200000 (ET_EXEC ELF64)
-echo "[7/7] ELF user programs (ring 3, AIkFS apps)"
 "$CLANG" --target=x86_64-elf $UCFLAGS -c -o build/hello.o user/hello.c
 "$CLANG" --target=x86_64-elf $UCFLAGS -c -o build/ver.o user/ver.c
 "$CLANG" --target=x86_64-elf $UCFLAGS -c -o build/readtest.o user/readtest.c
