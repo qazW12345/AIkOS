@@ -105,9 +105,11 @@ verification:
    `ready` when the implementer card reaches `done` — right for POST-merge
    verification.
 3. **Pre-merge review:** when the review must run BEFORE the merge (syscall
-   series rule — bugs must not compound), `hermes kanban promote <review-card>
-   --force` overrides the parent gate while the implementer card is still
-   blocked on needs_input. The link stays for the audit trail.
+   series rule — bugs must not compound), do NOT gate the review card on the
+   implementer card: `hermes kanban unlink <implementer> <review>` (unlinking a
+   parentless ready card keeps it ready — the dispatcher re-gates a forced
+   promote, so `promote --force` does NOT survive the tick). Keep the reference
+   in the card title instead (`[REVIEW] … (t_<id>)`).
 4. **Reviewer contract:** checklist-driven (ABI/spec/bounds/test-evidence/
    contracts), findings cite file:line, verdict is a proposal — never the gate.
    AIko verifies findings + runs the suite + merges.
