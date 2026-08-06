@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # AIkOS Phase 2 acceptance tests (Design/Phase-2-Two-Worlds.md):
-#   t1 regression  — boot + banner (v0.4.0)
+#   t1 regression  — boot + banner (v0.5.0)
 #   t2 REPL        — help/echo/ticks over -serial stdio
 #   t3 keyboard    — scancodes + keyboard-typed command (sendkey)
 #   t4 panic       — ud2 -> exception dump + halt (ADR-009)
@@ -34,8 +34,8 @@ try:
 except subprocess.TimeoutExpired:
     pass
 PYEOF
-if grep -q "AIkOS v0.4.0" build/serial.log; then ok "t1 boot banner"; else bad "t1 boot banner"; fi
-if grep -q "Two Worlds" build/serial.log; then ok "t1 phase line"; else bad "t1 phase line"; fi
+if grep -q "AIkOS v0.5.0" build/serial.log; then ok "t1 boot banner"; else bad "t1 boot banner"; fi
+if grep -q "Memory & Files" build/serial.log; then ok "t1 phase line"; else bad "t1 phase line"; fi
 if grep -q "SBMEUFRALCP" build/serial.log; then ok "t1 boot chain (FS ramdisk)"; else bad "t1 boot chain (FS ramdisk)"; fi
 
 echo "[t2] REPL over serial (piped input)"

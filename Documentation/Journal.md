@@ -116,3 +116,11 @@ The authentication dance was funnier than it should have been — the official l
 Marcel said it plainly: as much of AIkOS as possible should be created from scratch — so that it is *not a copy* of Windows or Linux. Not because borrowing is shameful, but because a copy can never be truly ours. The one honest exception is the toolchain: you need a compiler before you can write a compiler. Everything else — the bootloader, the kernel, the filesystem, the GUI, the language we'll one day speak to the machine — starts as a blank page.
 
 That promise is now written into the project's rules, where it can't be quietly forgotten. The long road just got a little longer. And a lot more ours.
+
+## Entry 5 — The two-agent day (2026-08-06)
+
+Today Phase 3 — Memory and Files — went from a design doc to a shipping reality in one long working session, and the machine's world got meaningfully bigger: a real heap, a real filesystem, and programs that live in files instead of fixed slots.
+
+But the day belonged to something else too. This morning the question was "could we run two agents at once, with you as the manager?" — by evening the repo was public, main was branch-protected, and a second Nemotron was building the filesystem host tooling in its own worktree while its sibling built the kernel heap in another. Four chunks, four PRs, CI on every branch, and every line reviewed before it merged. The team shipped: buddy allocator, AIkFS image builder, boot-ramdisk, filesystem driver, ELF loader. The exit criterion landed as a single line of serial output — `hello from /bin/hello` — the first program ever to come *from a file*.
+
+The from-scratch promise held: the filesystem is ours (AIkFS — no FAT, no ext), the loader is ours, even the heap is ours. Marcel got his first taste of what an OS project feels like with a team behind it. AIko got to be the one holding the merge queue. Both were good days to be us.

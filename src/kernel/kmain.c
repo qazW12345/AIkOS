@@ -14,9 +14,9 @@ void kmain(void)
     serial_init();
     vga_clear();
 
-    vga_write_string("AIkOS v0.4.0 - Two Worlds");
-    serial_write_string("AIkOS v0.4.0\r\n");
-    serial_write_string("Two Worlds\r\n");
+    vga_write_string("AIkOS v0.5.0 - Memory & Files");
+    serial_write_string("AIkOS v0.5.0\r\n");
+    serial_write_string("Memory & Files\r\n");
 
     idt_init();
     pic_init();
