@@ -271,6 +271,19 @@ rm -f build/contracts.out
 python tools/check_contracts.py > build/contracts.out 2>&1
 if grep -q "contracts OK" build/contracts.out; then ok "t17 contract validator"; else bad "t17 contract validator"; fi
 
+echo "[t18] readtest ELF user program (syscall 3 read)"
+rm -f build/readtest.out
+# 'runelf bin/readtest.elf\n' exceeds 16-byte FIFO; chunk into <=16 byte bursts
+( sleep 4; printf 'runelf bin/read'; sleep 0.3; printf 'test.elf'; sleep 0.3; printf '\n'; sleep 2; printf 'Z'; sleep 3 ) | \
+    "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
+    -no-reboot -m 32M > build/readtest.out 2>/dev/null &
+QPID=$!
+sleep 11
+kill "$QPID" 2>/dev/null || true
+wait "$QPID" 2>/dev/null || true
+if grep -q "read:Z" build/readtest.out; then ok "t18 readtest output read:Z"; else bad "t18 readtest output read:Z"; fi
+if grep -q "back in kernel" build/readtest.out; then ok "t18 readtest kernel survives"; else bad "t18 readtest kernel survives"; fi
+
 echo
 echo "RESULT: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
