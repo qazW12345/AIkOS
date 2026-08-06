@@ -10,11 +10,12 @@
 
 ```
 S  boot sector entered            B  disk read OK          M  kernel copied to 1MB
-A  A20 on                        L  GDT loaded            C  CR0.PE set
-P  protected mode               1  kernel entry           2  page tables built
-3  CR3 set                      4  CR4.PAE set           5  EFER.LME set
-6  CR0.PG set (paging on)       7  GDT64 loaded          8  long mode reached
-9  C stack set                  K  calling kmain
+E  E820 map collected             U  user blob read        F  fault blob read
+R  AIkFS ramdisk read             A  A20 on                L  GDT loaded
+C  CR0.PE set                    P  protected mode         1  kernel entry
+2  page tables built             3  CR3 set                4  CR4.PAE set
+5  EFER.LME set                  6  CR0.PG set (paging on) 7  GDT64 loaded
+8  long mode reached             9  C stack set            K  calling kmain
 ```
 
 4. If it dies early: check the milestones; if the boot sector itself fails, add `-monitor stdio` and use `info registers` / `xp /Nbx <addr>` / `screendump`.

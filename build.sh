@@ -12,8 +12,10 @@ cd "$ROOT"
 KERNEL_SECTORS=64   # must match the design doc memory map
 USER_SECTORS=16
 FAULT_SECTORS=16
+FS_SECTORS=64       # AIkFS partition (LBA 97; ramdisk at 0x400000)
 USER_LBA=$((KERNEL_SECTORS + 1))
 FAULT_LBA=$((USER_LBA + USER_SECTORS))
+FS_LBA=$((FAULT_LBA + FAULT_SECTORS))
 
 CFLAGS="-ffreestanding -nostdlib -fno-stack-protector -fno-pic -fno-pie \
 -mno-red-zone -mgeneral-regs-only -O2 -Wall -Wextra -std=c11"
@@ -26,10 +28,12 @@ echo "[1/7] boot sector"
 "$NASM" -f bin \
     -D KERNEL_SECTORS=$KERNEL_SECTORS -D USER_SECTORS=$USER_SECTORS \
     -D FAULT_SECTORS=$FAULT_SECTORS -D USER_LBA=$USER_LBA -D FAULT_LBA=$FAULT_LBA \
+    -D FS_SECTORS=$FS_SECTORS -D FS_LBA=$FS_LBA \
     -o build/boot.bin src/boot/boot.asm
 
 echo "[2/7] kernel assembly (entry + interrupt stubs)"
 "$NASM" -f elf64 -D USER_SECTORS=$USER_SECTORS -D FAULT_SECTORS=$FAULT_SECTORS \
+    -D FS_SECTORS=$FS_SECTORS \
     -o build/entry.o src/kernel/entry.asm
 "$NASM" -f elf64 -o build/interrupt.o src/kernel/interrupt.asm
 

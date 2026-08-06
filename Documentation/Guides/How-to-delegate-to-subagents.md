@@ -24,7 +24,7 @@ Sources: NVIDIA research page + developer blog (2026-06-04), OpenRouter model pa
 ## 2. What to delegate — reliability tiers for AIkOS
 
 **Tier 1 — delegate freely (read-only / low-risk):**
-- Log and test-output analysis: boot milestone chains (`SBM E U F A L C P 1…K`), test.sh result greps, QEMU serial captures
+- Log and test-output analysis: boot milestone chains (`SBMEUFRA LCP 1…K`), test.sh result greps, QEMU serial captures
 - Spec research with source links (OSDev wiki, Intel SDM behavior, tool docs)
 - Documentation drafting from bullet points: ADR summaries, TaskLog/Journal entries, Roadmap table edits, guide updates
 - Boilerplate generation following existing patterns: linker scripts, keymaps, test additions, build.sh sections

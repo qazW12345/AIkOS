@@ -36,6 +36,7 @@ except subprocess.TimeoutExpired:
 PYEOF
 if grep -q "AIkOS v0.4.0" build/serial.log; then ok "t1 boot banner"; else bad "t1 boot banner"; fi
 if grep -q "Two Worlds" build/serial.log; then ok "t1 phase line"; else bad "t1 phase line"; fi
+if grep -q "SBMEUFRALCP" build/serial.log; then ok "t1 boot chain (FS ramdisk)"; else bad "t1 boot chain (FS ramdisk)"; fi
 
 echo "[t2] REPL over serial (piped input)"
 rm -f build/repl.out
@@ -82,7 +83,7 @@ if grep -q "commands: help" build/kbd.log; then ok "t3 keyboard-typed command"; 
 
 echo "[t4] panic command -> exception dump + halt"
 rm -f build/panic.out
-( sleep 2; printf 'panic\n'; sleep 3 ) | \
+( sleep 4; printf 'panic\n'; sleep 3 ) | \
     "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
     -no-reboot -m 32M > build/panic.out 2>/dev/null &
 QPID=$!
@@ -95,7 +96,7 @@ if grep -q "rip=" build/panic.out; then ok "t4 rip in dump"; else bad "t4 rip in
 
 echo "[t5] time (RTC)"
 rm -f build/time.out
-( sleep 2; printf 'time\n'; sleep 3 ) | \
+( sleep 4; printf 'time\n'; sleep 3 ) | \
     "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
     -no-reboot -m 32M > build/time.out 2>/dev/null &
 QPID=$!
@@ -110,7 +111,7 @@ fi
 
 echo "[t6] cpuid"
 rm -f build/cpuid.out
-( sleep 2; printf 'cpuid\n'; sleep 3 ) | \
+( sleep 4; printf 'cpuid\n'; sleep 3 ) | \
     "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
     -no-reboot -m 32M > build/cpuid.out 2>/dev/null &
 QPID=$!
@@ -122,7 +123,7 @@ if grep -q "cpuid: family" build/cpuid.out; then ok "t6 family"; else bad "t6 fa
 
 echo "[t7] ring-3 program syscalls out (ADR-013)"
 rm -f build/user.out
-( sleep 2; printf 'run\n'; sleep 4 ) | \
+( sleep 4; printf 'run\n'; sleep 4 ) | \
     "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
     -no-reboot -m 32M > build/user.out 2>/dev/null &
 QPID=$!
@@ -136,7 +137,7 @@ if grep -q "back in kernel" build/user.out; then ok "t7 kernel survives"; else b
 
 echo "[t8] user fault kills task, kernel lives (ADR-013)"
 rm -f build/fault.out
-( sleep 2; printf 'runfault\n'; sleep 4 ) | \
+( sleep 4; printf 'runfault\n'; sleep 4 ) | \
     "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
     -no-reboot -m 32M > build/fault.out 2>/dev/null &
 QPID=$!
@@ -152,7 +153,7 @@ echo "[t9] hexdump REPL command"
 rm -f build/hexdump.out
 # input chunked <=15 bytes with gaps: QEMU's stdio chardev bursts overflow
 # the 16550 RX FIFO (war story #6) — 'hexdump 200000 10' is 18 bytes raw
-( sleep 2; printf 'hexdump 20000'; sleep 0.3; printf '0 10\n'; sleep 1
+( sleep 4; printf 'hexdump 20000'; sleep 0.3; printf '0 10\n'; sleep 1
   printf 'hexdump z';     sleep 0.3; printf 'zz 10\n'; sleep 2 ) | \
     "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
     -no-reboot -m 32M > build/hexdump.out 2>/dev/null &
@@ -167,7 +168,7 @@ if grep -q "bad address" build/hexdump.out; then ok "t9 hexdump bad address"; el
 echo "[t10] unknown command handling"
 rm -f build/unknown.out
 # 'foobar\n' is 7 bytes — one write is fine per FIFO rule
-( sleep 2; printf 'foobar\n'; sleep 1 ) | \
+( sleep 4; printf 'foobar\n'; sleep 1 ) | \
     "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
     -no-reboot -m 32M > build/unknown.out 2>/dev/null &
 QPID=$!
@@ -179,7 +180,7 @@ if grep -q "unknown command (try help)" build/unknown.out; then ok "t10 unknown 
 echo "[t11] heap REPL command"
 rm -f build/heap.out
 # 'heap\n' is 5 bytes — one write is fine per FIFO rule
-( sleep 2; printf 'heap\n'; sleep 1 ) | \
+( sleep 4; printf 'heap\n'; sleep 1 ) | \
     "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
     -no-reboot -m 32M > build/heap.out 2>/dev/null &
 QPID=$!
@@ -192,7 +193,7 @@ if grep -q "largest order" build/heap.out; then ok "t11 heap largest order"; els
 echo "[t12] heaptest REPL command"
 rm -f build/heaptest.out
 # 'heaptest\n' is 9 bytes — one write is fine per FIFO rule
-( sleep 2; printf 'heaptest\n'; sleep 10 ) | \
+( sleep 4; printf 'heaptest\n'; sleep 10 ) | \
     "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
     -no-reboot -m 32M > build/heaptest.out 2>/dev/null &
 QPID=$!

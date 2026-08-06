@@ -1,12 +1,13 @@
 ; AIkOS boot sector — real mode, loads kernel.bin to 0x100000, enters protected mode.
 ; Component: boot (real-mode boot sector)
-; Provides: the boot protocol — kernel + user blobs loaded, E820 map, A20,
+; Provides: the boot protocol — kernel + user blobs + AIkFS partition loaded,
+;           E820 map, A20,
 ;           protected-mode handoff to entry.asm
 ; Depends on: build.sh payload layout (KERNEL_SECTORS/USER_SECTORS/FAULT_*
 ;             defines), BIOS int 13h/15h (hardware behavior, ADR-008 spirit)
-; Owns: disk layout contract (boot + kernel + user + userfault sectors);
-;       E820 buffer 0x5000 (count @0x4FFC); low read buffers 0x10000/0x14000;
-;       kernel copy to 0x100000 (0xFFFF:0x0010); serial milestones S,B,M,E,U,F
+; Owns: disk layout contract (boot + kernel + user + userfault + AIkFS sectors);
+;       E820 buffer 0x5000 (count @0x4FFC); low read buffers 0x10000/0x14000/0x18000;
+;       kernel copy to 0x100000 (0xFFFF:0x0010); serial milestones S,B,M,E,U,F,R
 ; ADR-006. Assembled with NASM -f bin, loaded by BIOS at 0x7C00.
 ; Kernel sector count is injected by build.sh (-D KERNEL_SECTORS).
 ;
@@ -36,6 +37,12 @@
 %ifndef FAULT_LBA
 %define FAULT_LBA 81             ; + 16 user sectors
 %endif
+%ifndef FS_SECTORS
+%define FS_SECTORS 64
+%endif
+%ifndef FS_LBA
+%define FS_LBA 97                ; + 16 fault sectors (AIkFS partition)
+%endif
 
 KERNEL_LOAD_SEG  equ 0x1000      ; low read buffer: 0x1000:0x0000 = 0x10000
 KERNEL_LOAD_OFF  equ 0x0000
@@ -43,6 +50,7 @@ KERNEL_DEST_SEG  equ 0xFFFF      ; final destination: 0xFFFF:0x0010 = 0x100000
 KERNEL_DEST_OFF  equ 0x0010
 USER_LOAD_SEG    equ 0x1000      ; user blob low buffer: 0x10000 (reused)
 FAULT_LOAD_SEG   equ 0x1400      ; fault blob low buffer: 0x14000
+FS_LOAD_SEG      equ 0x1800      ; AIkFS ramdisk low buffer: 0x18000 (32 KiB)
 
 start:
     cli
@@ -127,6 +135,17 @@ start:
     xor di, di
     call read_sectors
     mov al, 'F'
+    call serial_putc
+
+    ; --- load AIkFS partition (ramdisk) to a low buffer; entry.asm copies
+    ;     it up to 0x400000 in long mode (Phase 3, ADR-015) ---
+    mov ax, FS_SECTORS
+    mov ebx, FS_LBA
+    mov cx, FS_LOAD_SEG
+    mov es, cx
+    xor di, di
+    call read_sectors
+    mov al, 'R'
     call serial_putc
 
     ; --- enable A20 (fast A20, port 0x92) ---
