@@ -253,6 +253,11 @@ wait "$QPID" 2>/dev/null || true
 if grep -q "hello from /bin/hello" build/runelf.out; then ok "t15 runelf hello output"; else bad "t15 runelf hello output"; fi
 if grep -q "back in kernel" build/runelf.out; then ok "t15 runelf kernel survives"; else bad "t15 runelf kernel survives"; fi
 
+echo "[t17] ADR-014 contract validator (host-side, no QEMU)"
+rm -f build/contracts.out
+python tools/check_contracts.py > build/contracts.out 2>&1
+if grep -q "contracts OK" build/contracts.out; then ok "t17 contract validator"; else bad "t17 contract validator"; fi
+
 echo
 echo "RESULT: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
