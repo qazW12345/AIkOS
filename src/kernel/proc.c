@@ -14,7 +14,6 @@
 
 #define USER_ENTRY    0x200000
 #define FAULT_ENTRY   0x220000
-#define USER_STACK    0x250000          /* grows down */
 #define FAULT_STACK   0x240000
 #define USER_PD_ENTRY 1                 /* 2 MiB entry: 0x200000-0x400000 */
 
