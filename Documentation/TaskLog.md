@@ -7,6 +7,22 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-05 — Repo public + branch protection + parallel PR workflow
+
+**Done:**
+- **Repo made public** (Marcel, 2026-08-05) — enables GitHub branch protection (was blocked on the free/private plan).
+- **`main` branch-protected**: PRs required, `test`+`lint` CI checks required, enforce-admins on, no force-push, linear history. All merges now flow through PRs.
+- **Delegation policy §2.5**: PR/branch workflow — one branch per task, worktrees for parallel agents (never share a dirty working tree), agents push to their branch only, reviewer merges, file-ownership rule for parallelism, dependency-aware merge order.
+- **First parallel experiment**: buddy allocator agent (main worktree, uncommitted) + second agent on `feat/mkfs-apps` (worktree `E:\Hermes_Agent\projects\AIkOS.mkfs`) building `tools/mkfs.py` + `/bin` user apps in parallel.
+
+**Next:** Phase 3 chunks (buddy → AIkFS → ELF → v0.5.0).
+
+**Build state:** unchanged (v0.4.0 + hexdump + command table).
+
+**Open questions:** none blocking.
+
+---
+
 ## 2026-08-05 — Phase 3 designed (Memory & Files)
 
 **Done:**

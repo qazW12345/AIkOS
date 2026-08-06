@@ -49,6 +49,27 @@ cross-cutting, or debugging* work: war-story territory, architecture, and anythi
 whose failure mode is silent corruption without a test. The reviewer's suite run is
 the non-negotiable gate.
 
+## 2.5 PR/branch workflow for parallel agents (2026-08-05)
+
+The repo is **public**; `main` is **branch-protected** (PRs required, CI must pass,
+no force-push, linear history). This is what makes multi-agent parallelism safe:
+
+- **One branch per task** (`feat/<name>`), one PR per task, CI runs on every branch
+  push (the workflow triggers on all branches — each PR gets its own suite + lint lane).
+- **Parallel agents use separate worktrees** (`git worktree add <path> -b <branch>`):
+  subagents share the machine but must NOT share a working tree — a dirty tree is
+  exactly how two agents tangle each other's edits. Each agent works in its own
+  directory on its own branch.
+- **Agents push to their branch only** and never touch `main` (branch protection is
+  the hard rail; brief discipline is the soft one). The reviewer creates/merges the
+  PR — agents never merge.
+- **File ownership** is the parallelism rule: concurrent tasks must own disjoint
+  file sets (`kernel.h`, `repl.c`, `kmain.c`, `test.sh` are shared — serialize tasks
+  that touch them). Dependent chunks (e.g. FS needs the heap) stay sequential or
+  branch-chained; independent edges (host tools, userland apps) fly in parallel.
+- Merge order respects dependencies; the reviewer's local suite run stays the
+  non-negotiable gate before any merge.
+
 ## 3. Instruction template (briefs must be self-contained)
 
 Subagents have **no memory** of this conversation. Every brief must include:
