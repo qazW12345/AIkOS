@@ -266,6 +266,11 @@ wait "$QPID" 2>/dev/null || true
 if grep -q "E820 memory map" build/memmap.out; then ok "t16 memmap header"; else bad "t16 memmap header"; fi
 if grep -q "type=1" build/memmap.out; then ok "t16 memmap usable type"; else bad "t16 memmap usable type"; fi
 
+echo "[t17] ADR-014 contract validator (host-side, no QEMU)"
+rm -f build/contracts.out
+python tools/check_contracts.py > build/contracts.out 2>&1
+if grep -q "contracts OK" build/contracts.out; then ok "t17 contract validator"; else bad "t17 contract validator"; fi
+
 echo
 echo "RESULT: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
