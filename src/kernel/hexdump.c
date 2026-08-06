@@ -28,7 +28,6 @@ static void hex_addr(uint64_t addr)
 
 void hexdump(uint64_t addr, uint64_t len)
 {
-    uint64_t i;
     uint64_t row_start;
     uint64_t row_end;
     uint64_t j;

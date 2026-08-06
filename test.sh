@@ -202,6 +202,32 @@ kill "$QPID" 2>/dev/null || true
 wait "$QPID" 2>/dev/null || true
 if grep -q "heaptest OK" build/heaptest.out; then ok "t12 heaptest OK"; else bad "t12 heaptest OK"; fi
 
+echo "[t13] fsinfo REPL command"
+rm -f build/fsinfo.out
+# 'fsinfo\n' is 7 bytes — one write is fine per FIFO rule
+( sleep 4; printf 'fsinfo\n'; sleep 3 ) | \
+    "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
+    -no-reboot -m 32M > build/fsinfo.out 2>/dev/null &
+QPID=$!
+sleep 8
+kill "$QPID" 2>/dev/null || true
+wait "$QPID" 2>/dev/null || true
+if grep -q "AIkFS1" build/fsinfo.out; then ok "t13 fsinfo magic"; else bad "t13 fsinfo magic"; fi
+if grep -q "v1" build/fsinfo.out; then ok "t13 fsinfo version"; else bad "t13 fsinfo version"; fi
+
+echo "[t14] ls REPL command"
+rm -f build/ls.out
+# 'ls\n' is 3 bytes — one write is fine per FIFO rule
+( sleep 4; printf 'ls\n'; sleep 3 ) | \
+    "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
+    -no-reboot -m 32M > build/ls.out 2>/dev/null &
+QPID=$!
+sleep 8
+kill "$QPID" 2>/dev/null || true
+wait "$QPID" 2>/dev/null || true
+if grep -q "bin" build/ls.out; then ok "t14 ls shows bin"; else bad "t14 ls shows bin"; fi
+if grep -q "hello.elf" build/ls.out; then ok "t14 ls shows hello.elf"; else bad "t14 ls shows hello.elf"; fi
+
 echo
 echo "RESULT: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
