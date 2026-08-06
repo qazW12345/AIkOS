@@ -7,6 +7,22 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-06 — [AIkOS] syscall 1/4: read(fd,buf,len) (Task t_a01a2e27)
+
+**Done:**
+- Implemented syscall 3 `read(fd, buf, len)` in `src/kernel/syscall.c` (fd 0 = serial stdin, polled RX copy up to `len` bytes, returns bytes read; invalid fd returns `0xFFFFFFFF`).
+- Created user application `user/readtest.c` with ADR-014 contract block: busy-loop calling `read(0, &c, 1)` until 1 byte is read, then writes `"read:"` + byte + CRLF via `sys_write`, then exits.
+- Updated `build.sh` to compile and stage `readtest.elf` into `/bin/readtest.elf` in AIkFS.
+- Added `[t18]` test group in `test.sh` following chunked-input pattern (`runelf bin/readtest.elf` chunked ≤16 bytes, sends `Z`, asserts `'read:Z'` and kernel survival).
+- Verified full test suite: **41 passed, 0 failed**.
+- Committed and pushed to `feat/syscall-read`.
+
+**Next:** syscall 2/4: open.
+
+**Build state:** v0.5.0; 41/41 passed (`./test.sh`); CI green.
+
+---
+
 ## 2026-08-06 — New worker profiles: opencode (DeepSeek V4 Flash Free) + mistral
 
 **Done:**
