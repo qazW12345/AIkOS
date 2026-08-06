@@ -40,6 +40,15 @@ Sources: NVIDIA research page + developer blog (2026-06-04), OpenRouter model pa
 - Debugging sessions (require full session history, war-story context, and iterative tool loops)
 - Any task whose failure cost exceeds the delegation savings — kernel edits are expensive failures
 
+**Tier 2.5 — kernel components with full contracts (Phase 3+, ADR-014):** a single
+kernel component whose contract block is complete, whose acceptance criteria are
+test.sh-verifiable, and where the reviewer runs the suite after review may be
+delegated even if it touches memory-management territory — e.g. the buddy allocator,
+the AIkFS driver, the ELF loader. The Tier-3 ban keeps its teeth for *subtle,
+cross-cutting, or debugging* work: war-story territory, architecture, and anything
+whose failure mode is silent corruption without a test. The reviewer's suite run is
+the non-negotiable gate.
+
 ## 3. Instruction template (briefs must be self-contained)
 
 Subagents have **no memory** of this conversation. Every brief must include:

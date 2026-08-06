@@ -109,14 +109,14 @@ refactor pays off exactly as designed.
 
 ## Test plan (test.sh v7 — 31 checks)
 
-Existing t1–t10 (26 checks) unchanged. New:
+Existing t1–t10 (26 checks) unchanged. New (added per implementation chunk):
 
-- **t11 fsinfo** — `fsinfo` → grep `AIkFS1` (superblock magic) and the version.
-- **t12 ls** — `ls` → grep `bin` and `hello.elf`.
-- **t13 runelf** — `runelf bin/hello.elf` → grep `hello from /bin/hello` +
-  `back in kernel` (ELF app ran and returned home — the exit criterion).
-- **t14 heap** — `heap` → grep the free-pages line.
-- **t15 heaptest** — `heaptest` → grep `heaptest OK` (buddy split/merge round-trip).
+- **t11 heap** — `heap` → grep the free-pages line (buddy chunk).
+- **t12 heaptest** — `heaptest` → grep `heaptest OK` (buddy split/merge round-trip).
+- **t13 fsinfo** — `fsinfo` → grep `AIkFS1` (superblock magic) and the version (FS chunk).
+- **t14 ls** — `ls` → grep `bin` and `hello.elf` (FS chunk).
+- **t15 runelf** — `runelf bin/hello.elf` → grep `hello from /bin/hello` +
+  `back in kernel` (ELF chunk — the exit criterion).
 
 All new test input stays ≤15 bytes per write (war story #6).
 
