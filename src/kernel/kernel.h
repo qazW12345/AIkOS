@@ -121,4 +121,9 @@ void fs_ls(void);
 int fs_read(const char *name, uint8_t **out, uint32_t *out_size);
 void fs_info(void);
 
+/* fd.c — file descriptor table */
+uint64_t fd_open(const char *path);
+int fd_close(uint64_t fd);
+int64_t fd_read(uint64_t fd, void *buf, uint64_t len);
+
 #endif

@@ -266,6 +266,19 @@ wait "$QPID" 2>/dev/null || true
 if grep -q "E820 memory map" build/memmap.out; then ok "t16 memmap header"; else bad "t16 memmap header"; fi
 if grep -q "type=1" build/memmap.out; then ok "t16 memmap usable type"; else bad "t16 memmap usable type"; fi
 
+echo "[t19] runelf opentest.elf (open syscall)"
+rm -f build/opentest.out
+# 'runelf bin/opentest.elf\n' is 23 bytes — chunk into 12 + 11 with gap
+( sleep 4; printf 'runelf bin/ope'; sleep 0.3; printf 'ntest.elf\n'; sleep 4 ) | \
+    "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
+    -no-reboot -m 32M > build/opentest.out 2>/dev/null &
+QPID=$!
+sleep 10
+kill "$QPID" 2>/dev/null || true
+wait "$QPID" 2>/dev/null || true
+if grep -q "open:3" build/opentest.out; then ok "t19 open syscall returns fd 3"; else bad "t19 open syscall returns fd 3"; fi
+if grep -q "user exited" build/opentest.out; then ok "t19 opentest exited"; else bad "t19 opentest exited"; fi
+
 echo "[t17] ADR-014 contract validator (host-side, no QEMU)"
 rm -f build/contracts.out
 python tools/check_contracts.py > build/contracts.out 2>&1
@@ -273,8 +286,10 @@ if grep -q "contracts OK" build/contracts.out; then ok "t17 contract validator";
 
 echo "[t18] readtest ELF user program (syscall 3 read)"
 rm -f build/readtest.out
-# 'runelf bin/readtest.elf\n' exceeds 16-byte FIFO; chunk into <=16 byte bursts
-( sleep 4; printf 'runelf bin/read'; sleep 0.3; printf 'test.elf'; sleep 0.3; printf '\n'; sleep 2; printf 'Z'; sleep 3 ) | \
+# 'runelf bin/readtest.elf\n' is 24 bytes — exceeds 16-byte FIFO; chunk into
+# two bursts (15 + 9) with a gap (war story #6: multi-burst drops under load —
+# hardened 2026-08-06 after t19-then-t18 churn ate a byte)
+( sleep 4; printf 'runelf bin/read'; sleep 0.5; printf 'test.elf\n'; sleep 2; printf 'Z'; sleep 3 ) | \
     "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
     -no-reboot -m 32M > build/readtest.out 2>/dev/null &
 QPID=$!

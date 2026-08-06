@@ -7,6 +7,18 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-06 — Syscall 4: open(path) implemented (`src/kernel/fd.c`, `user/opentest.c`, test [t19])
+
+**Done:**
+- **File descriptor table (`src/kernel/fd.c`)** — owns 16-slot kernel fd table in `.bss`, with `fd_open(path)`, `fd_close(fd)`, and `fd_read(fd, buf, len)`. FD numbers start at 3 (0/1/2 reserved for stdio). Path resolution adapts leading slash for AIkFS `fs_read`.
+- **Syscall dispatcher (`src/kernel/syscall.c`)** — added `case 4: { open }` invoking `fd_open(path)`.
+- **Userland test (`user/opentest.c`)** — opens `"/bin/hello.elf"` (obtaining fd 3), writes `"open:3\r\n"` via `sys_write`, and exits.
+- **Build & Test (`build.sh`, `test.sh`)** — wired `opentest.elf` into AIkFS build and added test group `[t19]`. Rebased onto main (read merged) — conflict resolution kept both read + open cases/tests; suite **43 passed, 0 failed**.
+- Committed and pushed to `feat/syscall-open`.
+
+**Next:**
+- Syscall 3/4: close(fd) and read_file.
+
 ## 2026-08-06 — [AIkOS] syscall 1/4: read(fd,buf,len) (Task t_a01a2e27)
 
 **Done:**
