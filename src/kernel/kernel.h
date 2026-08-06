@@ -112,6 +112,9 @@ int elf_load(const uint8_t *image, uint64_t size, uint64_t *entry_out);
 /* hexdump.c — memory dump tool */
 void hexdump(uint64_t addr, uint64_t len);
 
+/* memmap.c — physical memory map command */
+void memmap_cmd(const char *args);
+
 /* fs.c — AIkFS driver (ADR-015) */
 void fs_init(void);
 void fs_ls(void);
