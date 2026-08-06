@@ -135,3 +135,8 @@ The implement -> review hand-off can run WITHOUT AIko touching the board:
 4. **AIko's gate stays manual:** the reviewer's verdict does not merge
    anything — AIko verifies findings, runs the suite, merges, and queues the
    next card pair.
+5. **Tracking-only cards (bugs to fix later):** do NOT use `--triage` — the
+   auto-decomposer claims triage cards (specifies them, assigns the
+   orchestrator profile, and they get dispatched). Create bug/tracking cards
+   unassigned in `todo` instead (the dispatcher only spawns assigned cards) —
+   they wait for AIko, exactly like the EXCEPTION-6 card.
