@@ -99,8 +99,15 @@ void syscall_dispatch(struct isr_frame *f);
 /* proc.c — ring-3 processes (ADR-013) */
 void proc_run(void);
 void proc_run_fault(void);
+void proc_run_elf(uint64_t entry, uint64_t stack);   /* elf.c loads segments (ADR-016) */
 extern uint64_t proc_kernel_rsp;   /* parked stack (below interrupt-frame zone) */
 extern uint64_t proc_resume_addr;  /* REPL resume point (captured value) */
+
+/* User region constants (shared with elf.c for runelf) */
+#define USER_STACK    0x250000ULL   /* grows down */
+
+/* elf.c — ELF loader (ADR-016) */
+int elf_load(const uint8_t *image, uint64_t size, uint64_t *entry_out);
 
 /* hexdump.c — memory dump tool */
 void hexdump(uint64_t addr, uint64_t len);

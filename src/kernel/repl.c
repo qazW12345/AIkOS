@@ -94,6 +94,7 @@ static void cmd_heaptest(const char *args);
 static void cmd_fsinfo(const char *args);
 static void cmd_ls(const char *args);
 static void cmd_cat(const char *args);
+static void cmd_runelf(const char *args);
 
 struct repl_cmd {
     const char *name;                  /* command word, e.g. "echo" */
@@ -118,6 +119,7 @@ static const struct repl_cmd cmd_table[] = {
     { "fsinfo",      "fsinfo",                         cmd_fsinfo },
     { "ls",          "ls",                             cmd_ls },
     { "cat",         "cat <file>",                     cmd_cat },
+    { "runelf",      "runelf <file>",                  cmd_runelf },
 };
 
 static int cmd_table_size(void)
@@ -441,6 +443,38 @@ static void cmd_cat(const char *args)
     }
     serial_write_string("\r\n");
     kfree(buf);
+}
+
+static void cmd_runelf(const char *args)
+{
+    while (*args == ' ')
+        args++;
+
+    if (*args == '\0') {
+        kprintf("runelf: usage: runelf <file>\r\n");
+        return;
+    }
+
+    uint8_t *buf;
+    uint32_t size;
+    if (fs_read(args, &buf, &size) != 0) {
+        kprintf("runelf: not found\r\n");
+        return;
+    }
+
+    uint64_t entry;
+    if (elf_load(buf, size, &entry) != 0) {
+        kprintf("runelf: bad elf\r\n");
+        kfree(buf);
+        return;
+    }
+
+    // Image buffer no longer needed after loading
+    kfree(buf);
+
+    kprintf("entering ring 3 (ELF)...\r\n");
+    proc_run_elf(entry, USER_STACK);
+    kprintf("back in kernel\r\n");
 }
 
 static void repl_exec(char *cmd)

@@ -228,6 +228,20 @@ wait "$QPID" 2>/dev/null || true
 if grep -q "bin" build/ls.out; then ok "t14 ls shows bin"; else bad "t14 ls shows bin"; fi
 if grep -q "hello.elf" build/ls.out; then ok "t14 ls shows hello.elf"; else bad "t14 ls shows hello.elf"; fi
 
+echo "[t15] runelf REPL command"
+rm -f build/runelf.out
+# 'runelf bin/hello.elf\n' is 19 bytes — exceeds 16-byte FIFO (war story #6)
+# chunk into 'runelf bin/hel' (13) + 'lo.elf\n' (8) with gap — matches t9's 13+5 pattern
+( sleep 4; printf 'runelf bin/hel'; sleep 0.3; printf 'lo.elf\n'; sleep 4 ) | \
+    "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
+    -no-reboot -m 32M > build/runelf.out 2>/dev/null &
+QPID=$!
+sleep 10
+kill "$QPID" 2>/dev/null || true
+wait "$QPID" 2>/dev/null || true
+if grep -q "hello from /bin/hello" build/runelf.out; then ok "t15 runelf hello output"; else bad "t15 runelf hello output"; fi
+if grep -q "back in kernel" build/runelf.out; then ok "t15 runelf kernel survives"; else bad "t15 runelf kernel survives"; fi
+
 echo
 echo "RESULT: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
