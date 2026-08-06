@@ -75,6 +75,16 @@ call (verified: reviewer + implementer smoke pass lean; mistral's remaining
 blocker is the provider quota, not prompt size). Web access lives ONLY in the
 researcher profile — implementers/reviewer work from repo docs + cards.
 
+**Rate-limit pacing (free tiers — learned the hard way, 2026-08-06):** all four
+worker profiles carry `model.rate_limit_delay` (gemini 60 s, others 45 s) — on
+HTTP 429 the client **waits for the per-minute budget to refill before
+retrying**, instead of failing a burst. Card briefs for gemini tasks add:
+"the API budget is ~250K tokens/min — prefer targeted searches/greps over whole-
+file reads, and if you hit 429 just pause and retry (the harness waits for you)."
+Burst math that matters: N sequential calls × growing context can exceed the
+per-minute window in seconds (16 calls × ~19K tokens ≈ 300K in 38 s — the
+original memmap crash).
+
 **Tier 1 — delegate freely (read-only / low-risk):**
 - Log and test-output analysis: boot milestone chains (`SBMEUFRALCP 1…K`), test.sh result greps, QEMU serial captures
 - Spec research with source links (OSDev wiki, Intel SDM behavior, tool docs)
