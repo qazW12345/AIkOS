@@ -21,7 +21,15 @@ Two phases are now green (v0.1.0, v0.2.0) and `test.sh` is the canonical suite (
 CI grew without changing the core decision:
 
 - **paths-filter** (`dorny/paths-filter`, SHA-pinned): the QEMU suite runs only when code changes (`src/**`, `user/**`, `test.sh`, `build.sh`, `.github/**`). Docs-only pushes skip the ~3–4 min suite — the "every push" clause above is now "every push that touches code" (ADR-011 intent preserved; docs cannot break the kernel).
-- **super-linter** (SHA-pinned): shellcheck, markdownlint (house config `.github/linters/.markdown-lint.yml`), yamllint, gitleaks, checkov, zizmor, codespell. Formatter linters, textlint, and python linters are disabled by policy (one throwaway `tools/ppm2png.py`; revisit when real python tooling lands).
+- **CI lint job = gitleaks only (2026-08-06, supersedes the list below):** style
+   linters (shellcheck/markdownlint/yamllint/codespell) moved LOCAL to
+   `tools/lint-local.sh` + the reviewer agent — the GitHub lint job now exists
+   solely because gitleaks (secrets scan) is the one deterministic check that
+   cannot be delegated. Prior policy: **super-linter** (SHA-pinned): shellcheck,
+   markdownlint (house config `.github/linters/.markdown-lint.yml`), yamllint,
+   gitleaks, checkov, zizmor, codespell. Formatter linters, textlint, and python
+   linters are disabled by policy (one throwaway `tools/ppm2png.py`; revisit when
+   real python tooling lands).
 - **Supply-chain hardening:** all actions pinned to full SHAs (`owner/repo@sha`), least-privilege workflow permissions, `persist-credentials: false`.
 - **actions/cache verdict:** NOT adopted — the workflow has no package-manager dependency tree to cache (freestanding C + nasm; toolchain via apt, ~1 min); the dominant CI cost is QEMU wall-clock test time, which caching cannot reduce. Revisit when Phase 3+ userland tooling introduces dependency downloads (npm/pip/cargo-style), or if CI time analysis ever shows container-image pulls dominating.
 
