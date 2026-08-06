@@ -7,7 +7,17 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
-## 2026-08-06 — Syscall 4: open(path) implemented (`src/kernel/fd.c`, `user/opentest.c`, test [t19])
+## 2026-08-06 — Gemini retired; NIM implementer lane live (ADR-020)
+
+**Done:**
+- Deleted `gemini_implementer` profile (token cap too limiting for agent loops); retired budget-governor proxy (`gemini_budget_proxy.py`, localhost:8787) + keep-alive cron `e7a0b4e562f3` to `.gemini_retired/`.
+- Created `nvidia_implementer` profile: same model as the OpenRouter lane (`nvidia/nemotron-3-ultra-550b-a55b`) served directly from NVIDIA NIM (`integrate.api.nvidia.com/v1`), free, ~40 RPM per key. Delegation block fixed (was pointing at Google/gemma from clone).
+- OpenRouter $10 top-up: free-tier daily cap permanently raised 50 → 1000 req/day (all-time threshold).
+- Docs: ADR-020 supersedes ADR-019's roster/provider-governance clauses; delegation guide + kanban guide + AGENTS.md updated to the two-implementer reality (nemotron_implementer + nvidia_implementer).
+
+**Next:** EXCEPTION-6 fix card (`t_f3cace83`, ready) is Tier-3 → stays with AIko; modular test-suite card (`t_2c11c281`, ready) is the first card of the next batch. Build state: syscall 4/4 merged, suite green (23/23 syscall group).
+
+ — Syscall 4: open(path) implemented (`src/kernel/fd.c`, `user/opentest.c`, test [t19])
 
 **Done:**
 - **File descriptor table (`src/kernel/fd.c`)** — owns 16-slot kernel fd table in `.bss`, with `fd_open(path)`, `fd_close(fd)`, and `fd_read(fd, buf, len)`. FD numbers start at 3 (0/1/2 reserved for stdio). Path resolution adapts leading slash for AIkFS `fs_read`.

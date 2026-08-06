@@ -2,7 +2,8 @@
 
 > **Status:** current (2026-08-06). The coordination layer for the four-person team:
 > Marcel (owner), AIko (main agent — orchestrator + reviewer), Nemotron worker
-> (profile `nemotron`), Gemini worker (profile `gemini`).
+> (profile `nemotron_implementer`, OpenRouter free), NIM worker
+> (profile `nvidia_implementer`, NVIDIA NIM free).
 
 ## What the kanban is
 
@@ -10,9 +11,9 @@ Hermes's built-in durable work queue (SQLite board, `hermes kanban`). The gatewa
 runs a **dispatcher** (`kanban.dispatch_in_gateway: true`) that claims ready cards
 every 60 s and spawns the **assigned profile** as a worker session. Workers get the
 `kanban_*` toolset (show/complete/block/comment/heartbeat) and a pinned board via
-`HERMES_KANBAN_TASK`/`HERMES_KANBAN_BOARD`. Profiles: `nemotron`
-(nvidia/nemotron-3-ultra-550b-a55b:free via OpenRouter) and `gemini`
-(gemini-3.5-flash-lite via Google AI Studio). The generic `delegate_task` fallback
+`HERMES_KANBAN_TASK`/`HERMES_KANBAN_BOARD`. Implementer profiles: `nemotron_implementer`
+(nvidia/nemotron-3-ultra-550b-a55b:free via OpenRouter) and `nvidia_implementer`
+(nvidia/nemotron-3-ultra-550b-a55b via NVIDIA NIM). The generic `delegate_task` fallback
 runs gemma-4-31b-it (Google) — prefer the kanban for anything multi-step.
 
 ## The lifecycle AIko runs
@@ -20,7 +21,7 @@ runs gemma-4-31b-it (Google) — prefer the kanban for anything multi-step.
 ```
 1. CREATE     user request → cards (kanban create). One unit of work per card.
              auto_decompose: true splits big cards (3 per tick).
-2. ASSIGN     kanban assign <id> <nemotron|gemini> — or leave unassigned for
+2. ASSIGN     kanban assign <id> <nemotron_implementer|nvidia_implementer> — or leave unassigned for
              AIko's own hands (boot path, ring-3, review, docs).
 3. DISPATCH   the gateway dispatcher claims + spawns the worker automatically.
 4. WORK       the worker edits in ITS workspace (see card body for branch
@@ -74,7 +75,7 @@ runs gemma-4-31b-it (Google) — prefer the kanban for anything multi-step.
 ```bash
 hermes kanban ls                     # the board
 hermes kanban show <id>              # card + comments + events
-hermes kanban create --assignee nemotron --title "..." --body "..." # (or --assignee gemini)
+hermes kanban create --assignee nemotron_implementer --title "..." --body "..." # (or --assignee nvidia_implementer)
 hermes kanban link <child> <parent>  # dependency
 hermes kanban comment <id> "..."     # review verdict / context
 hermes kanban block|unblock <id>     # problems / resolved

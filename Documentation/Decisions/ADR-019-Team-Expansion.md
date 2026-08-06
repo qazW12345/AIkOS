@@ -2,7 +2,7 @@
 
 - **Status:** Accepted (2026-08-06)
 - **Supersedes:** the "two workers" clause of ADR-018 (kanban orchestration)
-- **Superseded by:** nothing
+- **Superseded by:** ADR-020 (implementer roster + provider governance)
 
 ## Context
 

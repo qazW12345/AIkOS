@@ -7,7 +7,7 @@ AIkOS is a from-scratch hobby operating system. This file is the entry point for
 1. Read `README.md` (root) — the router: current state, topic map, read order.
 2. Read `Documentation/TaskLog.md` — the newest entry tells you exactly where work stopped.
 3. Check `Documentation/Guides/` before rediscovering anything — hard-won knowledge lives there.
-4. Orchestrating workers (Nemotron + Gemini profiles): read `Documentation/Guides/How-to-use-kanban.md` (the board, AIko's lifecycle, file-ownership rules) and `Documentation/Guides/How-to-delegate-to-subagents.md` (tier rules, brief template, privacy rules, model division).
+4. Orchestrating workers (Nemotron + NIM implementer profiles): read `Documentation/Guides/How-to-use-kanban.md` (the board, AIko's lifecycle, file-ownership rules) and `Documentation/Guides/How-to-delegate-to-subagents.md` (tier rules, brief template, privacy rules, model division).
 5. Component contracts (ADR-014): every kernel file's header block states `Component / Provides / Depends on / Owns` — read the contract before the code, and cite contracts (not the whole tree) in any brief.
 
 ## After finishing work
