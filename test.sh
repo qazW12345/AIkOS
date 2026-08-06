@@ -47,7 +47,7 @@ bad() { echo "FAIL: $1"; FAIL=$((FAIL+1)); }
 #                  suite (./test.sh) — see tools/test_plan.sh for the mapper.
 FILTER="${1:-}"
 case "$FILTER" in ""|full|all) FILTER="";; esac
-GROUP_SYSCALL="t8 t18 t19 t20"
+GROUP_SYSCALL="t8 t18 t19 t20 t21"
 GROUP_RING3="t7 t8 t15"
 GROUP_FS="t13 t14 t15"
 GROUP_MM="t11 t12 t16"
@@ -337,7 +337,7 @@ if want_group t20 syscall; then
 echo "[t20] runelf closetest.elf (close syscall)"
 rm -f build/closetest.out
 # 'runelf bin/closetest.elf\n' is 24 bytes — chunk into 14 + 10 with gap
-( sleep 4; printf 'runelf bin/clo'; sleep 0.3; printf 'setest.elf\n'; sleep 4 ) | \
+( sleep 4; printf 'runelf bin/clo'; sleep 0.3; printf 'setest.elf\n'; sleep 4 ) |
     "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
     -no-reboot -m 32M > build/closetest.out 2>/dev/null &
 QPID=$!
@@ -346,6 +346,21 @@ kill "$QPID" 2>/dev/null || true
 wait "$QPID" 2>/dev/null || true
 if grep -q "close:0" build/closetest.out; then ok "t20 close syscall returns 0"; else bad "t20 close syscall returns 0"; fi
 if grep -q "back in kernel" build/closetest.out; then ok "t20 closetest kernel survives"; else bad "t20 closetest kernel survives"; fi
+fi
+
+if want_group t21 syscall; then
+echo "[t21] runelf readfiletest.elf (read_file syscall)"
+rm -f build/readfiletest.out
+# 'runelf bin/readfiletest.elf\n' is 28 bytes — chunk into 14 + 14 with gap
+( sleep 4; printf 'runelf bin/rea'; sleep 0.3; printf 'dfiletest.elf\n'; sleep 4 ) |
+    "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
+    -no-reboot -m 32M > build/readfiletest.out 2>/dev/null &
+QPID=$!
+sleep 10
+kill "$QPID" 2>/dev/null || true
+wait "$QPID" 2>/dev/null || true
+if grep -q "magic:ELF" build/readfiletest.out; then ok "t21 readfiletest magic:ELF"; else bad "t21 readfiletest magic:ELF"; fi
+if grep -q "back in kernel" build/readfiletest.out; then ok "t21 readfiletest kernel survives"; else bad "t21 readfiletest kernel survives"; fi
 fi
 
 echo "[t17] ADR-014 contract validator (host-side, no QEMU)"
