@@ -23,30 +23,32 @@ Sources: NVIDIA research page + developer blog (2026-06-04), OpenRouter model pa
 
 ## 2. What to delegate — reliability tiers for AIkOS
 
-**The team (2026-08-06, ADR-018):** AIko (main agent — orchestrator, reviewer,
-merge gate) · Nemotron (profile `nemotron`) · Gemini (profile `gemini`). Work is
+**The team (2026-08-06, ADR-018/019/020):** AIko (main agent — orchestrator, reviewer,
+merge gate) · Nemotron (profile `nemotron_implementer`, OpenRouter free) · NIM
+(profile `nvidia_implementer`, NVIDIA NIM free). Work is
 queued on the kanban (`hermes kanban`, see Guides/How-to-use-kanban.md); the
 gateway dispatcher spawns the assigned profile. One-shot slices may still use
 direct delegation.
 
-**Model capabilities (2026-08-06 research):**
+**Model capabilities (2026-08-06 research):** both implementer lanes run the
+**same model** — `nvidia/nemotron-3-ultra-550b-a55b` — via two independent
+free endpoints:
 
-| | Nemotron 3 Ultra 550B | Gemini 3.5 Flash-Lite |
+| | Nemotron via OpenRouter | Nemotron via NVIDIA NIM |
 |---|---|---|
-| Endpoint | OpenRouter (free) | Google AI Studio (paid, cheap) |
-| Context / output | 1M / 65K | 1M / 64K |
-| Speed | throttled (free tier) | ~350 tok/s |
-| SWE-bench Pro | 65–70.4% | 54.2% (≈ GPT-5.4 mini) |
-| Terminal-Bench | 54% | 54% |
-| Agentic (OSWorld) | — | 74% (best-in-class) |
-| Price | $0 | $0.30 / $2.50 per 1M |
-| Privacy | logs to NVIDIA | logs to Google |
+| Endpoint | `openrouter.ai` `:free` | `integrate.api.nvidia.com/v1` |
+| Context / output | 1M / 65K | 1M / 65K |
+| Speed | throttled (free tier) | ~40 RPM per key |
+| SWE-bench Pro | 65–70.4% | 65–70.4% (same model) |
+| Terminal-Bench | 54% | 54% (same model) |
+| Price | $0 (1000 req/day after $10 all-time top-up) | $0 |
+| Privacy | logs to provider | logs to NVIDIA |
 
-Both are **interchangeable on Tier-1/2 work — split by availability, not
+Both lanes are **interchangeable on Tier-1/2 work — split by availability, not
 capability**. Neither endpoint is a secrets sink: no credentials/PATs/personal
-data in card bodies or briefs. Empirical note: Gemini's first kernel tasks get
-the same review treatment as Phase 3's (expect reviewer fixes; the suite is the
-arbiter).
+data in card bodies or briefs. Empirical note: NIM is the newer lane; its first
+kernel tasks get the same review treatment as Phase 3's (expect reviewer fixes;
+the suite is the arbiter).
 
 **Newer workers (2026-08-06):** profile `deepseek_reviewer` = **deepseek-v4-flash-free**
 (OpenCode Zen gateway, OpenAI-compatible, FREE limited-time — **data may be used
@@ -63,8 +65,8 @@ renamed).
 
 | Profile | Model | Role | Toolsets |
 |---|---|---|---|
-| `nemotron_implementer` | nemotron-3-ultra-550b:free | **implementer** | file, terminal, search, todo |
-| `gemini_implementer` | gemini-3.5-flash-lite | **implementer** | file, terminal, search, todo |
+| `nemotron_implementer` | nemotron-3-ultra-550b:free (OpenRouter) | **implementer** | file, terminal, search, todo |
+| `nvidia_implementer` | nemotron-3-ultra-550b-a55b (NIM) | **implementer** | file, terminal, search, todo |
 | `deepseek_reviewer` | deepseek-v4-flash-free | **reviewer** (read-only; checklist + line-cited findings; never merges) | file, terminal, search |
 | `mimo_researcher` | mimo-v2.5-free | **researcher** (source-first, verbatim cites, URL evidence) | web, file |
 | `default` (AIko) | deepseek-v4-flash | orchestrator + gate (the root profile — cannot be renamed, per Hermes) | full |
@@ -75,15 +77,14 @@ call (verified: reviewer + implementer smoke pass lean; mistral's remaining
 blocker is the provider quota, not prompt size). Web access lives ONLY in the
 researcher profile — implementers/reviewer work from repo docs + cards.
 
-**Rate-limit pacing (2026-08-06):** all gemini traffic flows through a local
-**budget-governor proxy** (`scripts/gemini_budget_proxy.py`, localhost:8787,
-keep-alive cron `e7a0b4e562f3` every 5 min) that enforces 50% of the paid-tier
-limits: **2,000 req/min · 2M tokens/min (token bucket, held not dropped) ·
-75K req/day (persisted)**. `model.rate_limit_delay` is inert in this Hermes
-build (never consumed) — the proxy is the working throttle. Card briefs still
-demand search-first reading (fewer tokens/call). NOTE: the July 2026 blocker was
-the project's **monthly spend cap** at ai.studio/spend — check it if the API
-returns "exceeded its monthly spending cap".
+**Rate-limit pacing (2026-08-06):** implementer lanes are direct free endpoints —
+no proxy in the path. OpenRouter `:free` is account-wide **20 req/min · 1000
+req/day** (permanent after the $10 all-time top-up); NVIDIA NIM is **~40 RPM per
+key**. `model.rate_limit_delay` is inert in this Hermes build (never consumed) —
+free-tier throttling surfaces as 429s, handled by retry + lane-swap (assign the
+card to the other implementer profile). The former gemini budget-governor proxy
+(`gemini_budget_proxy.py`, localhost:8787) was retired with the gemini lane
+(ADR-020). Card briefs still demand search-first reading (fewer tokens/call).
 
 **Tier 1 — delegate freely (read-only / low-risk):**
 - Log and test-output analysis: boot milestone chains (`SBMEUFRALCP 1…K`), test.sh result greps, QEMU serial captures
