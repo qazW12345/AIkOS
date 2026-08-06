@@ -176,6 +176,31 @@ kill "$QPID" 2>/dev/null || true
 wait "$QPID" 2>/dev/null || true
 if grep -q "unknown command (try help)" build/unknown.out; then ok "t10 unknown command"; else bad "t10 unknown command"; fi
 
+echo "[t11] heap REPL command"
+rm -f build/heap.out
+# 'heap\n' is 5 bytes — one write is fine per FIFO rule
+( sleep 2; printf 'heap\n'; sleep 1 ) | \
+    "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
+    -no-reboot -m 32M > build/heap.out 2>/dev/null &
+QPID=$!
+sleep 6
+kill "$QPID" 2>/dev/null || true
+wait "$QPID" 2>/dev/null || true
+if grep -q "heap: free" build/heap.out; then ok "t11 heap free pages"; else bad "t11 heap free pages"; fi
+if grep -q "largest order" build/heap.out; then ok "t11 heap largest order"; else bad "t11 heap largest order"; fi
+
+echo "[t12] heaptest REPL command"
+rm -f build/heaptest.out
+# 'heaptest\n' is 9 bytes — one write is fine per FIFO rule
+( sleep 2; printf 'heaptest\n'; sleep 10 ) | \
+    "$QEMU" -drive file=build/disk.img,format=raw -serial stdio -display none \
+    -no-reboot -m 32M > build/heaptest.out 2>/dev/null &
+QPID=$!
+sleep 15
+kill "$QPID" 2>/dev/null || true
+wait "$QPID" 2>/dev/null || true
+if grep -q "heaptest OK" build/heaptest.out; then ok "t12 heaptest OK"; else bad "t12 heaptest OK"; fi
+
 echo
 echo "RESULT: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]

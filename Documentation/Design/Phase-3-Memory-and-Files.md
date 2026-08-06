@@ -75,7 +75,9 @@ existing blobs stay for the t7/t8 regression). Block = 512 B (one sector).
 - **Block 2.. — root directory:** fixed 32-byte entries: `name[16]` (NUL-padded),
   `type` u8 (1=file, 2=dir), `size` u32, `first_block` u32, `block_count` u32 →
   16 entries per block. Files are **contiguous extents** (first_block + block_count).
-- **Data blocks** from block 3 onward.
+- **Data blocks** start at block **4** (block 3 is the bin directory itself).
+  Bitmap bit ordering: bit i = block i, LSB-first within each byte (buildfs.py
+  convention — the kernel fs.c must match).
 
 `tools/buildfs.py` (host, python — precedent: tools/ppm2png.py) bakes a directory of
 files into the partition inside `build/disk.img`; build.sh invokes it after the blob
