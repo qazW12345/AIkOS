@@ -7,6 +7,23 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-06 — Kanban orchestration + Gemini worker onboarded (ADR-018)
+
+**Done:**
+- **Team:** `nemotron` profile (nvidia/nemotron-3-ultra-550b-a55b:free) + `gemini` profile (**gemini-3.5-flash-lite**, Google AI Studio, 1M ctx/64K out, 350 tok/s, $0.30/$2.50 per 1M; SWE-bench Pro 54.2% ≈ GPT-5.4 mini, Terminal-Bench 54%, OSWorld 74% — agentic/coding parity with Nemotron, faster + cheaper). Both smoke-tested on the board (`t_20e21f53`, `t_6a4d1850`).
+- **ADR-018** — kanban as the coordination layer; division of labor (AIko = orchestrator/reviewer/gate + war-story territory; workers interchangeable on Tier 1–2, split by availability); file-ownership rule = the parallelism guarantee; generic delegation fallback = gemma-4-31b-it.
+- **NEW Guide** `Documentation/Guides/How-to-use-kanban.md` — AIko's board lifecycle (create → assign → dispatch → review → merge), the kanban↔git mapping, card conventions (file set, branch discipline, evidence contract), daily commands, failure handling (auto-block at 2, stale reclaim at 4 h).
+- **Delegation policy** — team table + researched capability comparison + privacy note (both endpoints log; no secrets in cards).
+- **CI** — `concurrency` group per branch (cancel-in-progress): stale same-branch runs are cancelled; different branches still run in parallel; free-tier 2-job queue documented.
+
+**Next:** first real Gemini card (a Tier-2 AIkOS task) to calibrate empirically; Phase 4 (A Face) planning.
+
+**Build state:** v0.5.0; 36/36; CI green.
+
+**Open questions:** none.
+
+---
+
 ## 2026-08-06 — 🎉 PHASE 3 COMPLETE — v0.5.0: Memory & Files
 
 **Done (all via PRs, CI green, 36/36 suite):**

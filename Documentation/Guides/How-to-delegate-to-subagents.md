@@ -23,6 +23,31 @@ Sources: NVIDIA research page + developer blog (2026-06-04), OpenRouter model pa
 
 ## 2. What to delegate — reliability tiers for AIkOS
 
+**The team (2026-08-06, ADR-018):** AIko (main agent — orchestrator, reviewer,
+merge gate) · Nemotron (profile `nemotron`) · Gemini (profile `gemini`). Work is
+queued on the kanban (`hermes kanban`, see Guides/How-to-use-kanban.md); the
+gateway dispatcher spawns the assigned profile. One-shot slices may still use
+direct delegation.
+
+**Model capabilities (2026-08-06 research):**
+
+| | Nemotron 3 Ultra 550B | Gemini 3.5 Flash-Lite |
+|---|---|---|
+| Endpoint | OpenRouter (free) | Google AI Studio (paid, cheap) |
+| Context / output | 1M / 65K | 1M / 64K |
+| Speed | throttled (free tier) | ~350 tok/s |
+| SWE-bench Pro | 65–70.4% | 54.2% (≈ GPT-5.4 mini) |
+| Terminal-Bench | 54% | 54% |
+| Agentic (OSWorld) | — | 74% (best-in-class) |
+| Price | $0 | $0.30 / $2.50 per 1M |
+| Privacy | logs to NVIDIA | logs to Google |
+
+Both are **interchangeable on Tier-1/2 work — split by availability, not
+capability**. Neither endpoint is a secrets sink: no credentials/PATs/personal
+data in card bodies or briefs. Empirical note: Gemini's first kernel tasks get
+the same review treatment as Phase 3's (expect reviewer fixes; the suite is the
+arbiter).
+
 **Tier 1 — delegate freely (read-only / low-risk):**
 - Log and test-output analysis: boot milestone chains (`SBMEUFRA LCP 1…K`), test.sh result greps, QEMU serial captures
 - Spec research with source links (OSDev wiki, Intel SDM behavior, tool docs)

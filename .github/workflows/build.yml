@@ -2,6 +2,14 @@ name: build-and-test
 
 on: [push]
 
+# Three actors (AIko + 2 worker profiles) push to different branches; a new push
+# to the same branch supersedes its own stale run (ADR-018 multi-agent flow).
+# Different branches still run in parallel — GitHub free tier queues beyond
+# 2 concurrent jobs, which is fine (runs wait, they don't collide).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 # Least privilege: read-only at workflow level (checkov CKV2_GHA_1); the lint
 # job scopes statuses: write itself (zizmor excessive-permissions).
 permissions:
