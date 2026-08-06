@@ -48,24 +48,25 @@ data in card bodies or briefs. Empirical note: Gemini's first kernel tasks get
 the same review treatment as Phase 3's (expect reviewer fixes; the suite is the
 arbiter).
 
-**Newer workers (2026-08-06):** profile `opencode` = **deepseek-v4-flash-free**
+**Newer workers (2026-08-06):** profile `Deepseek_Reviewer` = **deepseek-v4-flash-free**
 (OpenCode Zen gateway, OpenAI-compatible, FREE limited-time — **data may be used
 for training**: treat it like the free endpoints, no secrets, and prefer it for
-non-sensitive tasks). Profile `researcher` = **mimo-v2.5-free** (Zen gateway, 1M
-context omnimodal, free — verified end-to-end). Profile `mistral` =
-mistral-medium-latest is **PARKED**: the free tier's quota refills ~1 tiny call
-per 30 min (measured), so even a lean Hermes prompt can't sustain a session —
-fine only for occasional direct-curl one-shots.
+non-sensitive tasks). Profile `Mimo_Researcher` = **mimo-v2.5-free** (Zen gateway, 1M
+context omnimodal, free — verified end-to-end). `mistral-medium-latest` was tried
+and **PARKED then deleted**: the free tier's quota refills ~1 tiny call per 30 min
+(measured), unusable even with lean prompts — fine only for occasional
+direct-curl one-shots. Profile names follow the `Model_Role` convention (renamed
+2026-08-06; `default` → `AIko`).
 
 **Role design + lean profiles (2026-08-06):**
 
 | Profile | Model | Role | Toolsets |
 |---|---|---|---|
-| `nemotron` | nemotron-3-ultra-550b:free | **implementer** | file, terminal, search, todo |
-| `gemini` | gemini-3.5-flash-lite | **implementer** | file, terminal, search, todo |
-| `opencode` | deepseek-v4-flash-free | **reviewer** (read-only; checklist + line-cited findings; never merges) | file, terminal, search |
-| `researcher` | mimo-v2.5-free | **researcher** (source-first, verbatim cites, URL evidence) | web, file |
-| `mistral` | mistral-medium-latest | **PARKED** — free-tier quota refills ~1 tiny call per 30 min; unusable for agent loops even with lean prompts (verified 2026-08-06) | web, file |
+| `Nemotron_Implementer` | nemotron-3-ultra-550b:free | **implementer** | file, terminal, search, todo |
+| `Gemini_Implementer` | gemini-3.5-flash-lite | **implementer** | file, terminal, search, todo |
+| `Deepseek_Reviewer` | deepseek-v4-flash-free | **reviewer** (read-only; checklist + line-cited findings; never merges) | file, terminal, search |
+| `Mimo_Researcher` | mimo-v2.5-free | **researcher** (source-first, verbatim cites, URL evidence) | web, file |
+| `AIko` | deepseek-v4-flash | orchestrator + gate (formerly `default`) | full |
 
 All four: neutral SOUL, memory OFF, **no personalities, no MCP servers, no
 skills catalog, no cron** — minimal harness = smaller prompts = fewer tokens per
