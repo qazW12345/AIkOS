@@ -1,5 +1,5 @@
 # codespell config — discovered natively at the repo root.
 # "ist" is the x86 IDT Interrupt Stack Table field (idt[n].ist, tss.ist[7]),
-# not a typo.
+# not a typo. "HDA" is Intel High Definition Audio, a hardware interface.
 [codespell]
-ignore-words-list = ist
+ignore-words-list = ist,HDA
