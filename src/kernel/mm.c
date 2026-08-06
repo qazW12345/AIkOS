@@ -1,6 +1,6 @@
 // Physical memory manager (ADR-012): E820 discovery + bitmap page allocator.
 // Component: mm (physical memory manager)
-// Provides: pmm_init, pmm_alloc_page, pmm_free_page
+// Provides: pmm_init, pmm_alloc_page, pmm_free_page, pmm_alloc_contiguous
 // Depends on: boot.asm (E820 entries @0x5000, count @0x4FFC),
 //             linker.ld (_kernel_start/_kernel_end)
 // Owns: bitmap @0xC000 (4 KiB, 128 MiB coverage); the E820 buffer 0x5000;
@@ -100,4 +100,28 @@ void pmm_free_page(void *page)
         pmm_mark(p, 0);
         pmm_free_count++;
     }
+}
+
+void *pmm_alloc_contiguous(uint32_t pages)
+{
+    if (pages == 0 || pages > PMM_BITMAP_PAGES)
+        return 0;
+
+    for (uint32_t i = 0; i <= PMM_BITMAP_PAGES - pages; i++) {
+        int found = 1;
+        for (uint32_t j = 0; j < pages; j++) {
+            if (pmm_test(i + j)) {
+                found = 0;
+                i += j;  // skip past the used page
+                break;
+            }
+        }
+        if (found) {
+            for (uint32_t j = 0; j < pages; j++)
+                pmm_mark(i + j, 1);
+            pmm_free_count -= pages;
+            return (void *)((uint64_t)i * PMM_PAGE_SIZE);
+        }
+    }
+    return 0;  // out of memory
 }

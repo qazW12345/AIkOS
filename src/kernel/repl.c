@@ -89,6 +89,8 @@ static void cmd_vga(const char *args);
 static void cmd_run(const char *args);
 static void cmd_runfault(const char *args);
 static void cmd_hexdump(const char *args);
+static void cmd_heap(const char *args);
+static void cmd_heaptest(const char *args);
 
 struct repl_cmd {
     const char *name;                  /* command word, e.g. "echo" */
@@ -108,6 +110,8 @@ static const struct repl_cmd cmd_table[] = {
     { "run",         "run",                            cmd_run },
     { "runfault",    "runfault",                       cmd_runfault },
     { "hexdump",     "hexdump <addr> <len>",           cmd_hexdump },
+    { "heap",        "heap",                           cmd_heap },
+    { "heaptest",    "heaptest",                       cmd_heaptest },
 };
 
 static int cmd_table_size(void)
@@ -267,6 +271,133 @@ static void cmd_hexdump(const char *args)
     } else {
         hexdump(addr, len);
     }
+}
+
+static void cmd_heap(const char *args)
+{
+    (void)args;
+    uint64_t free_pages;
+    int largest_order;
+    uint64_t alloc_blocks;
+    heap_stats(&free_pages, &largest_order, &alloc_blocks);
+    kprintf("heap: free %lu pages, largest order %d, %lu blocks\r\n",
+            free_pages, largest_order, alloc_blocks);
+}
+
+static void cmd_heaptest(const char *args)
+{
+    (void)args;
+    int ok = 1;
+
+    // (a) kmalloc sizes {16, 100, 4096, 5000, 200000}
+    size_t sizes_a[] = {16, 100, 4096, 5000, 200000};
+    void *bufs_a[5];
+    for (int i = 0; i < 5; i++) {
+        bufs_a[i] = kmalloc(sizes_a[i]);
+        if (!bufs_a[i]) {
+            kprintf("heaptest: kmalloc failed at step a[%d]\r\n", i);
+            ok = 0;
+            break;
+        }
+        // fill with (i + j) & 0xFF
+        unsigned char *p = (unsigned char *)bufs_a[i];
+        for (size_t j = 0; j < sizes_a[i]; j++)
+            p[j] = (unsigned char)((i + j) & 0xFF);
+        // verify
+        for (size_t j = 0; j < sizes_a[i]; j++) {
+            if (p[j] != (unsigned char)((i + j) & 0xFF)) {
+                kprintf("heaptest: verify failed at step a[%d], j=%zu\r\n", i, j);
+                ok = 0;
+                break;
+            }
+        }
+        if (!ok) break;
+    }
+
+    // (b) kfree buffers 0, 2, 4 (leaving gaps)
+    if (ok) {
+        kfree(bufs_a[0]);
+        kfree(bufs_a[2]);
+        kfree(bufs_a[4]);
+    }
+
+    // (c) kmalloc sizes {64, 8192, 65536}, fill + verify with fresh patterns
+    size_t sizes_c[] = {64, 8192, 65536};
+    void *bufs_c[3];
+    if (ok) {
+        for (int i = 0; i < 3; i++) {
+            bufs_c[i] = kmalloc(sizes_c[i]);
+            if (!bufs_c[i]) {
+                kprintf("heaptest: kmalloc failed at step c[%d]\r\n", i);
+                ok = 0;
+                break;
+            }
+            unsigned char *p = (unsigned char *)bufs_c[i];
+            for (size_t j = 0; j < sizes_c[i]; j++)
+                p[j] = (unsigned char)((i * 17 + j * 3) & 0xFF);
+            for (size_t j = 0; j < sizes_c[i]; j++) {
+                if (p[j] != (unsigned char)((i * 17 + j * 3) & 0xFF)) {
+                    kprintf("heaptest: verify failed at step c[%d], j=%zu\r\n", i, j);
+                    ok = 0;
+                    break;
+                }
+            }
+            if (!ok) break;
+        }
+    }
+
+    // (d) kfree everything
+    if (ok) {
+        kfree(bufs_a[1]);
+        kfree(bufs_a[3]);
+        kfree(bufs_c[0]);
+        kfree(bufs_c[1]);
+        kfree(bufs_c[2]);
+    }
+
+    // (d2) accounting: every page must be back in the free lists
+    // (catches coalescing leaks AND alignment-fragmentation — a merged block
+    //  that is never re-pushed disappears from the heap, and unaligned pulls
+    //  that never re-merge undercount free pages; buffer-content checks see
+    //  neither). With aligned pulls heaptest holds ~135 pages before step (e);
+    //  require >= 100 free — the unaligned variant yields ~70 and must FAIL.
+    if (ok) {
+        uint64_t free_pages;
+        int largest_order;
+        uint64_t alloc_blocks;
+        heap_stats(&free_pages, &largest_order, &alloc_blocks);
+        if (alloc_blocks != 0 || free_pages < 100) {
+            kprintf("heaptest: accounting FAIL (free %lu pages, %lu blocks)\r\n",
+                    free_pages, alloc_blocks);
+            ok = 0;
+        }
+    }
+
+    // (e) kmalloc 1000000, fill + verify, kfree
+    if (ok) {
+        void *big = kmalloc(1000000);
+        if (!big) {
+            kprintf("heaptest: kmalloc failed at step e\r\n");
+            ok = 0;
+        } else {
+            unsigned char *p = (unsigned char *)big;
+            for (size_t j = 0; j < 1000000; j++)
+                p[j] = (unsigned char)(j & 0xFF);
+            for (size_t j = 0; j < 1000000; j++) {
+                if (p[j] != (unsigned char)(j & 0xFF)) {
+                    kprintf("heaptest: verify failed at step e, j=%zu\r\n", j);
+                    ok = 0;
+                    break;
+                }
+            }
+            kfree(big);
+        }
+    }
+
+    if (ok)
+        kprintf("heaptest OK\r\n");
+    else
+        kprintf("heaptest FAIL\r\n");
 }
 
 static void repl_exec(char *cmd)
