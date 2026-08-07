@@ -28,11 +28,16 @@ void syscall_dispatch(struct isr_frame *f)
         kprintf("SYSCALL 2 (exit)\r\nuser exited\r\n");
         /* Rewrite the whole frame tail for a same-ring return to the
          * kernel: iretq validates SS.RPL == CPL even without a ring
-         * change — a leftover user SS (0x23, RPL 3) is #GP(0x20). */
+         * change — a leftover user SS (0x23, RPL 3) is #GP(0x20).
+         * Clear IF as well: the iretq restores the USER's rflags, and a
+         * pending PIT tick fires in the iretq's shadow with rsp = stack_top,
+         * pushing its frame onto the chain's resume slots (EXCEPTION-6
+         * card — same fix as the idt.c user-fault rewrite). */
         f->cs = 0x08;
         f->ss = 0x10;
         f->rsp = (uint64_t)stack_top;
         f->rip = (uint64_t)user_return; /* trampoline -> REPL call chain */
+        f->rflags &= ~0x200;            /* clear IF: interrupts off at user_return */
         break;
     }
     case 3: {                           /* read */

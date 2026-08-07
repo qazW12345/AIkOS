@@ -99,11 +99,17 @@ void isr_handler(struct isr_frame *f)
             dump_frame(f);
             kprintf("user program terminated\r\n");
             /* Full frame-tail rewrite for a same-ring return (ADR-013):
-             * iretq validates SS.RPL == CPL — the user SS (0x23) must go. */
+             * iretq validates SS.RPL == CPL — the user SS (0x23) must go.
+             * Clear IF too: the iretq restores the USER's rflags (IF=1), and
+             * a pending PIT tick is delivered in the iretq's shadow with
+             * rsp = stack_top — its frame lands ON the chain's saved-rbp /
+             * return-address slots, destroying the resume (EXCEPTION-6 card,
+             * bisected to the 4a586102 REPL-table refactor). */
             f->cs = 0x08;
             f->ss = 0x10;
             f->rsp = (uint64_t)stack_top;
             f->rip = (uint64_t)user_return;
+            f->rflags &= ~0x200;    /* clear IF: interrupts off at user_return */
             return;
         }
         // CPU exception from the kernel -> panic-and-halt (ADR-009)
