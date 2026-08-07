@@ -23,6 +23,15 @@ struct tss {
 
 static struct tss tss;
 
+/* Dedicated kernel stack for ring-3 -> ring-0 transitions (interrupts,
+ * syscalls, faults). RSP0 MUST NOT be the main kernel stack: the REPL chain
+ * (kmain -> repl_run -> repl_handle -> cmd_run -> proc_run) runs near the top
+ * of stack_top, and a ring-3 interrupt frame pushed at RSP0 would overwrite
+ * the chain's frames, destroying the resume state (war story: EXCEPTION 6 at
+ * rip=0x3 after "back in kernel" — fixed 2026-08-07, ADR-021/EXCEPTION-6 card).
+ * Each privilege level gets its own stack; RSP0 is used ONLY for ring changes. */
+static uint8_t int_stack[4096] __attribute__((aligned(16)));
+
 extern char stack_top[];                /* linker.ld, top of the 16 KiB stack */
 extern unsigned char gdt64[];           /* entry.asm */
 
@@ -47,7 +56,8 @@ static void gdt_set_tss(uint64_t base, uint32_t limit)
 
 void tss_init(void)
 {
-    tss.rsp0 = (uint64_t)stack_top;
+    tss.rsp0 = (uint64_t)int_stack + sizeof(int_stack); /* top of the
+                                                           dedicated stack */
     tss.iomap_base = (uint16_t)sizeof(struct tss);
     gdt_set_tss((uint64_t)&tss, (uint32_t)sizeof(struct tss) - 1);
     __asm__ volatile("ltr %w0" : : "r"((uint16_t)0x28));

@@ -1,9 +1,10 @@
 // Processes (ADR-013): ring-3 programs in their own address space.
 // Component: proc (ring-3 processes)
-// Provides: proc_run, proc_run_fault, proc_run_elf; globals proc_kernel_rsp,
-//           proc_resume_addr, proc_resume_regs (consumed by entry.asm's
-//           user_return trampoline)
-// Depends on: mm (pmm_alloc_page), entry.asm (kernel PD @0xB000, user_return)
+// Provides: proc_run, proc_run_fault, proc_run_elf; globals proc_resume_addr,
+//           proc_resume_regs (consumed by entry.asm's user_return trampoline)
+// Depends on: mm (pmm_alloc_page), entry.asm (kernel PD @0xB000, user_return),
+//             tss (dedicated RSP0 interrupt stack — ring-3 frames never
+//             clobber the REPL chain near stack_top)
 // Owns: per-process page tables; the user region 0x200000-0x400000 (U/S);
 //       resume-capture state; the ring-3 entry/return machinery
 // Phase 2: one process at a time, but the full per-process page-table
@@ -19,18 +20,27 @@
 
 static uint64_t proc_cr3;
 static int proc_built;
-uint64_t proc_kernel_rsp;   /* parked stack (below the interrupt-frame zone) */
 uint64_t proc_resume_addr;  /* REPL resume point — captured as a VALUE: the
                                chain's return addresses live near stack_top
-                               and ring-3 interrupt frames (pushed at RSP0)
-                               overwrite them — only the captured value
-                               survives */
+                               and ring-3 interrupt frames (pushed at the
+                               dedicated RSP0 stack) must never overwrite
+                               them — only the captured value survives */
+uint64_t proc_resume_rsp;   /* the caller's rsp at the `call proc_run*`
+                               site (= callee rbp + 16). The resumed code
+                               expects rsp here, NOT the frame base: callers
+                               with stack locals (cmd_runelf's subq $0x20)
+                               run their epilogue from the call-site rsp.
+                               (EXCEPTION-6 fix, 2026-08-07) */
 struct proc_resume_regs {
     uint64_t rbp, rbx, r12, r13, r14, r15;
 } proc_resume_regs;         /* callee-saved regs of the REPL chain: the user
                                program clobbers them (esp. rbp) and the
                                interrupt frame only preserves the kernel's
-                               values from int-time, not the chain's */
+                               values from int-time, not the chain's.
+                               rbp = the caller's frame base (saved rbp),
+                               restored so [rbp] and [rbp+8] (saved rbp and
+                               return address) are reachable from the
+                               call-site rsp */
 
 static void proc_build_address_space(void)
 {
@@ -66,11 +76,6 @@ static void proc_enter(uint64_t entry, uint64_t stack)
     if (!proc_built)
         proc_build_address_space();
 
-    /* Park the stack 4 KiB below the interrupt-frame zone: ring-3
-     * interrupts push their frames at RSP0 (= stack_top) and would
-     * otherwise clobber a chain running near the top. */
-    __asm__ volatile("sub $0x1000, %%rsp" : : : "memory");
-    __asm__ volatile("mov %%rsp, %0" : "=r"(proc_kernel_rsp) :: "memory");
     __asm__ volatile("mov %0, %%cr3" : : "r"(proc_cr3) : "memory");
     /* iretq frame: ss, rsp, rflags, cs, rip — pushed low to high */
     __asm__ volatile(
@@ -88,17 +93,21 @@ void proc_run(void)
 {
     /* Capture the REPL resume point + callee-saved registers (frame-pointer
      * ABI guarantees: [rbp] = caller's saved rbp, [rbp+8] = our return
-     * address). Everything else gets destroyed by ring-3 execution and
-     * interrupt frames before we ever return. */
+     * address). The caller's rsp at the call site = rbp + 16 — the resumed
+     * code runs from THERE, not from the frame base (callers may hold
+     * stack locals below rbp). Everything else gets destroyed by ring-3
+     * execution and interrupt frames before we ever return. */
     __asm__ volatile(
         "movq 8(%%rbp), %0\n\t"
-        "movq 0(%%rbp), %1\n\t"
-        "movq %%rbx, %2\n\t"
-        "movq %%r12, %3\n\t"
-        "movq %%r13, %4\n\t"
-        "movq %%r14, %5\n\t"
-        "movq %%r15, %6\n\t"
-        : "=r"(proc_resume_addr), "=r"(proc_resume_regs.rbp),
+        "leaq 16(%%rbp), %1\n\t"
+        "movq 0(%%rbp), %2\n\t"
+        "movq %%rbx, %3\n\t"
+        "movq %%r12, %4\n\t"
+        "movq %%r13, %5\n\t"
+        "movq %%r14, %6\n\t"
+        "movq %%r15, %7\n\t"
+        : "=r"(proc_resume_addr), "=r"(proc_resume_rsp),
+          "=r"(proc_resume_regs.rbp),
           "=m"(proc_resume_regs.rbx), "=m"(proc_resume_regs.r12),
           "=m"(proc_resume_regs.r13), "=m"(proc_resume_regs.r14),
           "=m"(proc_resume_regs.r15));
@@ -113,13 +122,15 @@ void proc_run_elf(uint64_t entry, uint64_t stack)
 {
     __asm__ volatile(
         "movq 8(%%rbp), %0\n\t"
-        "movq 0(%%rbp), %1\n\t"
-        "movq %%rbx, %2\n\t"
-        "movq %%r12, %3\n\t"
-        "movq %%r13, %4\n\t"
-        "movq %%r14, %5\n\t"
-        "movq %%r15, %6\n\t"
-        : "=r"(proc_resume_addr), "=r"(proc_resume_regs.rbp),
+        "leaq 16(%%rbp), %1\n\t"
+        "movq 0(%%rbp), %2\n\t"
+        "movq %%rbx, %3\n\t"
+        "movq %%r12, %4\n\t"
+        "movq %%r13, %5\n\t"
+        "movq %%r14, %6\n\t"
+        "movq %%r15, %7\n\t"
+        : "=r"(proc_resume_addr), "=r"(proc_resume_rsp),
+          "=r"(proc_resume_regs.rbp),
           "=m"(proc_resume_regs.rbx), "=m"(proc_resume_regs.r12),
           "=m"(proc_resume_regs.r13), "=m"(proc_resume_regs.r14),
           "=m"(proc_resume_regs.r15));
@@ -130,13 +141,15 @@ void proc_run_fault(void)
 {
     __asm__ volatile(
         "movq 8(%%rbp), %0\n\t"
-        "movq 0(%%rbp), %1\n\t"
-        "movq %%rbx, %2\n\t"
-        "movq %%r12, %3\n\t"
-        "movq %%r13, %4\n\t"
-        "movq %%r14, %5\n\t"
-        "movq %%r15, %6\n\t"
-        : "=r"(proc_resume_addr), "=r"(proc_resume_regs.rbp),
+        "leaq 16(%%rbp), %1\n\t"
+        "movq 0(%%rbp), %2\n\t"
+        "movq %%rbx, %3\n\t"
+        "movq %%r12, %4\n\t"
+        "movq %%r13, %5\n\t"
+        "movq %%r14, %6\n\t"
+        "movq %%r15, %7\n\t"
+        : "=r"(proc_resume_addr), "=r"(proc_resume_rsp),
+          "=r"(proc_resume_regs.rbp),
           "=m"(proc_resume_regs.rbx), "=m"(proc_resume_regs.r12),
           "=m"(proc_resume_regs.r13), "=m"(proc_resume_regs.r14),
           "=m"(proc_resume_regs.r15));

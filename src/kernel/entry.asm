@@ -145,20 +145,33 @@ long_mode:
 
 ; --- user_return: entered via a rewritten interrupt frame (ADR-013). ---
 ; The iretq that lands here did NOT pop ss/rsp (no ring change). Resume the
-; REPL chain: restore the parked stack, the chain's callee-saved registers
-; (the user program clobbers them), and jump to the captured resume address.
+; REPL chain: restore the caller's call-site rsp (captured — callers may hold
+; stack locals below the frame base, so rsp = frame base alone is wrong), the
+; chain's callee-saved registers (the user program clobbers them), and jump
+; to the captured resume address. The ring-3 interrupt frame now lives on the
+; dedicated RSP0 stack, so the chain's frames near stack_top are untouched.
 global user_return
-extern proc_kernel_rsp      ; proc.c
+extern proc_resume_rsp      ; proc.c
 extern proc_resume_addr     ; proc.c
 extern proc_resume_regs     ; proc.c
 user_return:
-    mov rsp, [rel proc_kernel_rsp]
+    ; Entered via a rewritten interrupt frame whose RFLAGS.IF was CLEARED
+    ; (syscall.c exit / idt.c user-fault rewrite) — the iretq restored the
+    ; user's rflags, so a pending PIT tick would otherwise be delivered in
+    ; the iretq's shadow, with rsp = stack_top, pushing its frame ON the
+    ; chain's saved-rbp/return-address slots (EXCEPTION-6 card: bisect
+    ; 4a586102 REPL-table refactor deepened the chain; t8 race = pending
+    ; tick at iretq; fixed by clearing IF in the rewritten frame).
+    ; cli is defense-in-depth; the rsp switch below must not be interruptible.
+    cli
+    mov rsp, [rel proc_resume_rsp]   ; caller's rsp at the call site
     mov rbp, [rel proc_resume_regs + 0]
     mov rbx, [rel proc_resume_regs + 8]
     mov r12, [rel proc_resume_regs + 16]
     mov r13, [rel proc_resume_regs + 24]
     mov r14, [rel proc_resume_regs + 32]
     mov r15, [rel proc_resume_regs + 40]
+    sti
     jmp [rel proc_resume_addr]
 
 ; --- kputc: raw serial byte, SysV AMD64 ABI (char arg in DIL) — for C ---
