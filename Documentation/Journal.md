@@ -153,3 +153,32 @@ second free door. NVIDIA's NIM gives us Nemotron 3 Ultra 550B directly, no
 OpenRouter in between, its own rate bucket. Two implementers, one model, two
 independent lanes. The old proxy scripts went into a retirement folder — not
 deleted, just parked, the way you keep a tool you might one day reach for again.
+
+---
+
+## Entry 13 — The bug that taught us to bisect (2026-08-07)
+
+For weeks, a ghost lived in the kernel. Every time a user-mode program ended —
+exiting cleanly, or crashing on purpose — the kernel printed "back in kernel"
+and then, sometimes, died. The tests all said green, because the tests were
+looking for that exact phrase, printed just before the crash. A log-grep trap:
+the kernel could be dead by the time the test finished reading the output.
+
+We fought it with dumps and disassembly and theories. Then we did the obvious
+thing we should have done first: asked git which change broke it. A strict
+harness — not the grep-based suite — walked the history, and pointed at a
+single commit: the day the REPL got a command table. Harmless-looking
+refactor, two extra layers of function calls, and the kernel's old trick of
+parking its return stack at a fixed offset stopped matching reality.
+
+The fix was three small truths: give interrupt frames their own stack so they
+can never trample the REPL's; remember the exact stack position at the call
+site instead of guessing with a fixed offset; and clear the interrupt flag in
+the rewritten frame, because a timer tick was sneaking in during the very
+instant the CPU returned from user mode — landing its own frame on top of the
+one we were trying to restore. A timing coincidence so precise it looked
+deterministic, and so deterministic it looked like anything but a race.
+
+The ghost is gone. The board's oldest card is closed, and the lesson is
+written where the next session will find it: when a bug hides behind a green
+suite, trust the bisect, not the grep.

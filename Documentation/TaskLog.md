@@ -7,6 +7,21 @@ The source of truth for "where are we". The newest entry describes the current s
 
 ---
 
+## 2026-08-07 — EXCEPTION-6 / ring-3 resume bug FIXED (ADR-021, PR #36)
+
+**Done:**
+- **Root cause found by git bisect** (strict harness, not the grep suite): first bad commit `4a586102` (REPL command-table refactor) — added `dispatch → cmd_runfault` indirection, deepening the chain and breaking the fixed 4 KiB park offset (`proc_kernel_rsp`); parent `b80ac47` passes strict t8.
+- **Fix (3 parts, ADR-021, PR #36 merged):**
+  1. `tss.c`: dedicated `int_stack[4096]`, RSP0 = its top — ring-3 interrupt frames can no longer overwrite the REPL chain near stack_top.
+  2. `proc.c`/`entry.asm`: capture and restore the **call-site rsp** (`rbp+16`) instead of the fixed park; `proc_kernel_rsp` removed.
+  3. `syscall.c`/`idt.c`: clear IF (`f->rflags &= ~0x200`) in the rewritten frame — a phase-locked PIT tick was firing in the iretq's shadow at rsp=stack_top, landing its frame on the chain's resume slots (this is also why a debug build's extra serial output seemed to "fix" it — timing shift, red herring).
+- **Verified:** strict t8 3/3 pass; t7/t15 clean; full suite 47/47 (intermittent t18 FIFO flake aside — war story #6, passes in isolation); zero EXCEPTION/PAGE FAULT across all ring-3 outputs.
+- Card `t_f3cace83` completed.
+
+**Next:** test hardening `t_4187cc33` — strict assertions (no EXCEPTION + fresh `AIkOS>` prompt after "back in kernel") so this class of bug can't hide behind grep again. Modular test suite `t_2c11c281` is the next batch's first card.
+
+---
+
 ## 2026-08-06 — Gemini retired; NIM implementer lane live (ADR-020)
 
 **Done:**
